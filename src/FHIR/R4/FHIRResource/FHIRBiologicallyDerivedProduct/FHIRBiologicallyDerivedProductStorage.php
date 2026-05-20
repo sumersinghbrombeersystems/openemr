@@ -214,7 +214,7 @@ class FHIRBiologicallyDerivedProductStorage extends FHIRBackboneElement implemen
     /**
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         return $this->get_fhirElementName();
     }
@@ -241,7 +241,7 @@ class FHIRBiologicallyDerivedProductStorage extends FHIRBackboneElement implemen
     }
 
     /**
-     * @param boolean $returnSXE
+     * @param bool $returnSXE
      * @param \SimpleXMLElement $sxe
      * @return string|\SimpleXMLElement
      */

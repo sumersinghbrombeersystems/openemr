@@ -155,7 +155,7 @@ class FHIRMeasureReportComponent extends FHIRBackboneElement implements \JsonSer
     /**
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         return (string)$this->getValue();
     }
@@ -176,7 +176,7 @@ class FHIRMeasureReportComponent extends FHIRBackboneElement implements \JsonSer
     }
 
     /**
-     * @param boolean $returnSXE
+     * @param bool $returnSXE
      * @param \SimpleXMLElement $sxe
      * @return string|\SimpleXMLElement
      */

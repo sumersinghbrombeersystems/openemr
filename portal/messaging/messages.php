@@ -14,40 +14,45 @@
  * @license   https://github.com/openemr/openemr/blob/master/LICENSE GNU General Public License 3
  */
 
-// Will start the (patient) portal OpenEMR session/cookie.
-require_once(__DIR__ . "/../../src/Common/Session/SessionUtil.php");
-OpenEMR\Common\Session\SessionUtil::portalSessionStart();
+use OpenEMR\Common\Csrf\CsrfUtils;
+use OpenEMR\Common\Session\SessionWrapperFactory;
+use OpenEMR\Core\Header;
+use OpenEMR\Core\OEGlobalsBag;
+use OpenEMR\Events\Messaging\SendSmsEvent;
 
-if (isset($_SESSION['pid']) && isset($_SESSION['patient_portal_onsite_two'])) {
-    $pid = $_SESSION['pid'];
+// Will start the (patient) portal OpenEMR session/cookie.
+// Need access to classes, so run autoloader now instead of in globals.php.
+require_once(__DIR__ . "/../../vendor/autoload.php");
+$globalsBag = OEGlobalsBag::getInstance();
+$session = SessionWrapperFactory::getInstance()->getActiveSession();
+
+if (!empty($session->get('pid')) && !empty($session->get('patient_portal_onsite_two'))) {
+    $pid = $session->get('pid');
     $ignoreAuth_onsite_portal = true;
     require_once(__DIR__ . "/../../interface/globals.php");
     define('IS_DASHBOARD', false);
-    define('IS_PORTAL', $_SESSION['portal_username']);
+    define('IS_PORTAL', $session->get('portal_username'));
 } else {
-    OpenEMR\Common\Session\SessionUtil::portalSessionCookieDestroy();
+    SessionWrapperFactory::getInstance()->destroyPortalSession();
     $ignoreAuth = false;
     require_once(__DIR__ . "/../../interface/globals.php");
-    if (!isset($_SESSION['authUserID'])) {
+    $session = SessionWrapperFactory::getInstance()->getActiveSession();
+    if (empty($session->get('authUserID'))) {
         $landingpage = "index.php";
         header('Location: ' . $landingpage);
         exit();
     }
 
-    define('IS_DASHBOARD', $_SESSION['authUser']);
+    define('IS_DASHBOARD', $session->get('authUser'));
     define('IS_PORTAL', false);
 }
-
+$srcdir = $globalsBag->getString('srcdir');
 require_once("$srcdir/patient.inc.php");
 require_once("$srcdir/options.inc.php");
 require_once("$srcdir/classes/Document.class.php");
 require_once("./../lib/portal_mail.inc.php");
 
-use OpenEMR\Common\Csrf\CsrfUtils;
-use OpenEMR\Core\Header;
-use OpenEMR\Events\Messaging\SendSmsEvent;
-
-if (!(isset($GLOBALS['portal_onsite_two_enable'])) || !($GLOBALS['portal_onsite_two_enable'])) {
+if (!$globalsBag->getBoolean('portal_onsite_two_enable')) {
     echo xlt('Patient Portal is turned off');
     exit;
 }
@@ -56,22 +61,22 @@ $docid = empty($_REQUEST['docid']) ? 0 : (int)$_REQUEST['docid'];
 $orderid = empty($_REQUEST['orderid']) ? 0 : (int)$_REQUEST['orderid'];
 
 $result = getMails(IS_DASHBOARD ?: IS_PORTAL, 'inbox', '', '');
-$theresult = array();
+$theresult = [];
 foreach ($result as $iter) {
     $theresult[] = $iter;
 }
 
-$isSMS = !empty($GLOBALS['oefax_enable_sms'] ?? 0);
-$isEmail = !empty($GLOBALS['oe_enable_email'] ?? 0);
+$isSMS = !empty($globalsBag->get('oefax_enable_sms') ?? 0);
+$isEmail = !empty($globalsBag->get('oe_enable_email') ?? 0);
 $showSMS = $isSMS && IS_DASHBOARD;
-$dashuser = array();
+$dashuser = [];
 if (IS_DASHBOARD) {
-    $dashuser = getUserIDInfo($_SESSION['authUserID']);
+    $dashuser = getUserIDInfo($session->get('authUserID'));
 }
 
 function getAuthPortalUsers()
 {
-    $resultpd = $resultusers = $resultpatients = array();
+    $resultpd = $resultusers = $resultpatients = [];
 
     if (IS_DASHBOARD) { // admin can mail anyone
         $authusers = sqlStatement("SELECT users.username as userid,
@@ -84,15 +89,17 @@ function getAuthPortalUsers()
  CONCAT(users.fname,' ',users.lname) as username, 'user' as type FROM users WHERE id = 1");
         }
 
-        $authpatients = sqlStatement("SELECT (CONCAT(patient_data.fname, patient_data.id)) as userid,
- CONCAT(patient_data.fname,' ',patient_data.lname) as username,'p' as type,patient_data.pid as pid FROM patient_data WHERE allow_patient_portal = 'YES'");
+        $authpatients = sqlStatement("SELECT pao.portal_username as userid,
+ CONCAT(patient_data.fname,' ',patient_data.lname) as username,'p' as type,patient_data.pid as pid FROM patient_data
+ LEFT JOIN patient_access_onsite pao ON pao.pid = patient_data.pid
+ WHERE allow_patient_portal = 'YES' AND pao.portal_username IS NOT NULL");
         while ($row = sqlFetchArray($authpatients)) {
             $resultpatients[] = $row;
         }
 
         $resultpd = array_merge($resultusers, $resultpatients);
     } else { // patient gets only portal users
-        $resultpd = array();
+        $resultpd = [];
         $authusers = sqlStatement("SELECT users.username as userid, CONCAT(users.fname,' ',users.lname) as username FROM users WHERE active = 1 AND portal_user = 1");
         while ($row = sqlFetchArray($authusers)) {
             $resultpd[] = $row;
@@ -141,7 +148,7 @@ function getAuthPortalUsers()
                 $scope.deletedItems = [];
                 $scope.inboxItems = [];
                 $scope.inboxItems = <?php echo json_encode($theresult);?>;
-                $scope.userproper = <?php echo !empty($_SESSION['ptName']) ? js_escape($_SESSION['ptName']) : js_escape($dashuser['fname'] . ' ' . $dashuser['lname']);?>;
+                $scope.userproper = <?php echo !empty($session->get('ptName', null)) ? js_escape($session->get('ptName')) : js_escape($dashuser['fname'] . ' ' . $dashuser['lname']);?>;
                 $scope.isPortal = "<?php echo IS_PORTAL;?>";
                 $scope.isDashboard = "<?php echo IS_DASHBOARD ?: 0;?>";
                 $scope.cUserId = $scope.isPortal ? $scope.isPortal : $scope.isDashboard;
@@ -153,7 +160,7 @@ function getAuthPortalUsers()
                 $scope.xLate.confirm.one = <?php echo xlj('Confirm to Archive Current Thread?'); ?>;
                 $scope.xLate.confirm.all = <?php echo xlj('Confirm to Archive Selected Messages?'); ?>;
                 $scope.xLate.confirm.err = <?php echo xlj('You are sending to yourself!'); ?>;  // I think I got rid of this ability - look into..
-                $scope.csrf = <?php echo js_escape(CsrfUtils::collectCsrfToken('messages-portal')); ?>;
+                $scope.csrf = <?php echo js_escape(CsrfUtils::collectCsrfToken($session, 'messages-portal')); ?>;
                 $scope.isInit = false;
 
                 $scope.init = function () {
@@ -239,14 +246,28 @@ function getAuthPortalUsers()
                     $scope.currentPage = this.n;
                 };
 
-                $scope.deleteItem = function (idx) {
+                $scope.deleteItem = function (item) {
+                    if (!item) return false;
                     if (!confirm($scope.xLate.confirm.one)) return false;
-                    const itemToDelete = $scope.allItems[idx];
-                    const idxInItems = $scope.items.indexOf(itemToDelete);
-                    $scope.deleteMessage(itemToDelete.mail_chain); // Just this user's message
-                    $scope.items.splice(idxInItems, 1);
-                    $scope.search();
-                    $scope.init()
+                    const removeFromList = function (list) {
+                        if (!Array.isArray(list)) return;
+                        for (let i = list.length - 1; i >= 0; i--) {
+                            if (list[i] && list[i].mail_chain === item.mail_chain) {
+                                list.splice(i, 1);
+                            }
+                        }
+                    };
+                    $scope.deleteMessage(item.mail_chain).then(function () {
+                        removeFromList($scope.items);
+                        removeFromList($scope.inboxItems);
+                        removeFromList($scope.sentItems);
+                        removeFromList($scope.allItems);
+                        if ($scope.selected && $scope.selected.mail_chain === item.mail_chain) {
+                            $scope.selected = null;
+                        }
+                        $scope.search();
+                        $scope.getDeletedMessages();
+                    });
                     return false;
                 };
 
@@ -267,12 +288,12 @@ function getAuthPortalUsers()
                 };
 
                 $scope.deleteMessage = function (id) {
-                    $http.post('handle_note.php', $.param({'task': 'delete', 'noteid': id, 'csrf_token_form': $scope.csrf})).then(function successCallback(response) {
+                    return $http.post('handle_note.php', $.param({'task': 'delete', 'noteid': id, 'csrf_token_form': $scope.csrf})).then(function successCallback(response) {
                         return true;
                     }, function errorCallback(response) {
                         alert(response.data);
+                        return $q.reject(response);
                     });
-
                 };
 
                 $scope.isMessageSelected = function () {
@@ -313,20 +334,27 @@ function getAuthPortalUsers()
                     return true;
                 }
 
-                $scope.readMessage = function (idx) {
-                    if ($scope.items[idx].message_status == 'New') { // mark mail read else ignore
-                        $http.post('handle_note.php', $.param({'task': 'setread', 'noteid': $scope.items[idx].id, 'csrf_token_form': $scope.csrf})).then(function successCallback(response) {
-                            $scope.items[idx].message_status = 'Read';
-                            $scope.selected.message_status = 'Read';
+                $scope.readMessage = function (item) {
+                    if (!item) return;
+                    if (item.message_status == 'New') {
+                        $http.post('handle_note.php', $.param({'task': 'setread', 'noteid': item.id, 'csrf_token_form': $scope.csrf})).then(function successCallback(response) {
+                            const markReadById = function (list, id) {
+                                if (!Array.isArray(list)) return;
+                                for (let i = 0; i < list.length; i++) {
+                                    if (list[i] && list[i].id === id) {
+                                        list[i].message_status = 'Read';
+                                    }
+                                }
+                            };
+                            markReadById($scope.items, item.id);
+                            markReadById($scope.inboxItems, item.id);
+                            markReadById($scope.sentItems, item.id);
+                            markReadById($scope.allItems, item.id);
                         }, function errorCallback(response) {
                             alert(response.data);
                         });
                     }
-                    idx = $filter('getById')($scope.allItems, this.item.id);
-                    $scope.isAll = true;
-                    $scope.isTrash = $scope.isSent = $scope.isInbox = false;
-                    $scope.items = $scope.allItems;
-                    $scope.selected = $scope.items[idx];
+                    $scope.selected = item;
                 };
 
                 $scope.selMessage = function (idx) {
@@ -345,13 +373,19 @@ function getAuthPortalUsers()
                 };
 
                 $scope.renderMessageBody = function (html) {
-                    html = DOMPurify.sanitize(html, { USE_PROFILES: { html: true } });
+                    html = DOMPurify.sanitize(html, {
+                        USE_PROFILES: { html: true },
+                        FORBID_TAGS: ['a', 'img']
+                    });
                     return html;
                 };
 
                 $scope.htmlToText = function (html) {
                     const hold = document.createElement('DIV');
-                    hold.innerHTML = DOMPurify.sanitize(html, { USE_PROFILES: { html: true } });
+                    hold.innerHTML = DOMPurify.sanitize(html, {
+                        USE_PROFILES: { html: true },
+                        FORBID_TAGS: ['a', 'img']
+                    });
                     return jsText(hold.textContent || hold.innerText || '');
                 };
 
@@ -534,7 +568,7 @@ function getAuthPortalUsers()
 
         <?php
         if ($showSMS) {
-            $GLOBALS['kernel']->getEventDispatcher()->dispatch(new SendSmsEvent($pid), SendSmsEvent::JAVASCRIPT_READY_SMS_POST);
+            $globalsBag->getKernel()->getEventDispatcher()->dispatch(new SendSmsEvent($pid), SendSmsEvent::JAVASCRIPT_READY_SMS_POST);
         }
         ?>
     </script>
@@ -565,11 +599,8 @@ function getAuthPortalUsers()
                                 <a class="nav-link" data-toggle="pill" href="javascript:;" ng-click="isTrashSelected()"><span class="badge float-right">{{deletedItems.length}}</span><?php echo xlt('Archive'); ?></a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="<?php echo $GLOBALS['web_root'] ?>/portal/patient/provider" ng-show="!isPortal"><?php echo xlt('Exit Mail'); ?></a>
+                                <a class="nav-link" href="<?php echo $globalsBag->getString('web_root') ?>/portal/patient/provider" ng-show="!isPortal"><?php echo xlt('Exit Mail'); ?></a>
                             </li>
-                            <!--<li class="nav-item">
-                                <a class="nav-link" href="javascript:;" onclick='window.location.replace("<?php /*echo $GLOBALS['web_root'] */ ?>/portal/home.php")' ng-show="isPortal"><?php /*echo xlt('Exit'); */ ?></a>
-                            </li>-->
                         </ul>
                     </div>
                 </div>
@@ -582,7 +613,7 @@ function getAuthPortalUsers()
                             </button>
                             <?php
                             if ($showSMS) {
-                                $GLOBALS['kernel']->getEventDispatcher()->dispatch(new SendSmsEvent($_SESSION['pid'] ?? 0), SendSmsEvent::ACTIONS_RENDER_SMS_POST);
+                                $globalsBag->getKernel()->getEventDispatcher()->dispatch(new SendSmsEvent($session->get('pid', 0)), SendSmsEvent::ACTIONS_RENDER_SMS_POST);
                             }
                             ?>
                             <a class="btn btn-secondary" data-toggle="tooltip" title="<?php echo xla("Refresh to see new messages"); ?>" id="refreshInbox" href="javascript:;" onclick='window.location.replace("./messages.php")'> <span class="fa fa-sync fa-lg"></span>
@@ -603,7 +634,7 @@ function getAuthPortalUsers()
                                         <a href="javascript:;" onclick='window.location.replace("./messages.php")' ng-show="isPortal" class="dropdown-item"><i class="fa fa-sync"></i> <?php echo xlt('Refresh'); ?></a>
                                     </li>
                                     <li>
-                                        <a href="<?php echo $GLOBALS['web_root'] ?>/portal/patient/provider" ng-show="!isPortal" class="dropdown-item"><i class="fa fa-home"></i> <?php echo xlt('Return Home'); ?></a>
+                                        <a href="<?php echo $globalsBag->getString('web_root') ?>/portal/patient/provider" ng-show="!isPortal" class="dropdown-item"><i class="fa fa-home"></i> <?php echo xlt('Return Home'); ?></a>
                                     </li>
                                 </ul>
                             </div>
@@ -624,19 +655,19 @@ function getAuthPortalUsers()
                                     <td role = "button" class="message-row">
                                         <span class="col-sm-1" style="max-width: 5px;"><input type="checkbox" checklist-model="item.deleted" value={{item.deleted}}></span>
 
-                                        <span class="col-sm-1 px-1"  ng-click="readMessage($index)" ><span ng-class="{strong: !item.read}">{{item.message_status}}</span></span>
-                                        <span class="col-sm-2 px-1"  ng-click="readMessage($index)" ><span ng-class="{strong: !item.read}">{{item.date | date:'yyyy-MM-dd hh:mm'}}</span></span>
-                                        <span class="col-sm-3 px-1"  ng-click="readMessage($index)" >
-                                            <a ng-click="readMessage($index)" class="btn-link">
+                                        <span class="col-sm-1 px-1"  ng-click="readMessage(item)" ><span ng-class="{strong: !item.read}">{{item.message_status}}</span></span>
+                                        <span class="col-sm-2 px-1"  ng-click="readMessage(item)" ><span ng-class="{strong: !item.read}">{{item.date | date:'yyyy-MM-dd hh:mm'}}</span></span>
+                                        <span class="col-sm-3 px-1" ng-click="readMessage(item)">
+                                            <a ng-click="$event.stopPropagation(); readMessage(item)" class="btn-link">
                                                 <span ng-class="{strong: !item.read}">{{item.sender_name}} to {{item.recipient_name}}</span>
                                             </a>
                                         </span>
-                                        <span class="col-sm-1"  ng-click="readMessage($index)">
-                                            <a ng-click="readMessage($index)" class="btn-link">
+                                        <span class="col-sm-1" ng-click="readMessage(item)">
+                                            <a ng-click="$event.stopPropagation(); readMessage(item)" class="btn-link">
                                                 <span ng-class="{strong: !item.read}">{{item.title}}</span>
                                             </a>
                                         </span>
-                                        <span class="col-sm-4 px-1"  ng-click="readMessage($index)"><span ng-class="{strong: !item.read}" ng-bind='(htmlToText(item.body) | limitTo:35)'></span></span>
+                                        <span class="col-sm-4 px-1"  ng-click="readMessage(item)"><span ng-class="{strong: !item.read}" ng-bind='(htmlToText(item.body) | limitTo:35)'></span></span>
                                         <!-- below for attachments, eventually -->
                                         <!-- <span class="col-sm-1 " ng-click="readMessage($index)"><span ng-show="item.attachment"
                                     class="glyphicon glyphicon-paperclip float-right"></span> <span ng-show="item.priority==1"
@@ -672,7 +703,7 @@ function getAuthPortalUsers()
                                         <thead><?php echo xlt('Associated Messages in thread.');?></thead>
                                         <tbody>
                                         <tr class="animate-repeat" ng-repeat="item in allItems | Chained:selected.mail_chain">
-                                            <td role = "button" ng-click="readMessage($index)">
+                                            <td role = "button" ng-click="readMessage(item)">
                                                 <span class="col-sm px-1"><span>{{item.date | date:'yyyy-MM-dd hh:mm'}}</span></span>
                                                 <span class="col-sm"><span>{{item.message_status}}</span></span>
                                                 <span class="col-sm px-1"><span>{{item.sender_name}}
@@ -681,7 +712,7 @@ function getAuthPortalUsers()
                                                 <span class='btn-group float-right m-0'>
                                                     <button ng-show="selected.sender_id != cUserId && selected.id == item.id" class="btn btn-primary btn-small" title="<?php echo xla('Reply to this message'); ?>" data-toggle="modal" data-mode="reply" data-noteid='{{selected.id}}' data-whoto='{{selected.sender_id}}' data-mtitle='{{selected.title}}' data-username='{{selected.sender_name}}' data-mailchain='{{selected.mail_chain}}' data-target="#modalCompose"><i class="fa fa-reply"></i></button>
                                                     <button ng-show="selected.id == item.id && selected.sender_id != cUserId && !isPortal" class="btn btn-primary btn-small" title="<?php echo xla('Forward message to practice.'); ?>" data-toggle="modal" data-mode="forward" data-noteid='{{selected.id}}' data-whoto='{{selected.sender_id}}' data-mtitle='{{selected.title}}' data-username='{{selected.sender_name}}' data-mailchain='{{selected.mail_chain}}' data-target="#modalCompose"><i class="fa fa-share"></i></button>
-                                                    <button ng-show='!isTrash && selected.id == item.id' class="btn btn-small btn-primary" ng-click="deleteItem(items.indexOf(selected))" title="<?php echo xla('Archive this message'); ?>" data-toggle="tooltip"><i class="fa fa-trash fa-1x"></i>
+                                                    <button ng-show='!isTrash && selected.id == item.id' class="btn btn-small btn-primary" ng-click="deleteItem(selected)" title="<?php echo xla('Archive this message'); ?>" data-toggle="tooltip"><i class="fa fa-trash fa-1x"></i>
                                                     </button>
                                                 </span>
                                                 <div class='col jumbotron jumbotron-fluid my-3 p-1 bg-light text-dark rounded border border-info' ng-show="selected.id == item.id">

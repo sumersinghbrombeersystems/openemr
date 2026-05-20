@@ -196,7 +196,7 @@ class FHIRDeviceProperty extends FHIRBackboneElement implements \JsonSerializabl
     /**
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         return $this->get_fhirElementName();
     }
@@ -226,7 +226,7 @@ class FHIRDeviceProperty extends FHIRBackboneElement implements \JsonSerializabl
     }
 
     /**
-     * @param boolean $returnSXE
+     * @param bool $returnSXE
      * @param \SimpleXMLElement $sxe
      * @return string|\SimpleXMLElement
      */

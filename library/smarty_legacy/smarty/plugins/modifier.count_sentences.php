@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Smarty plugin
  * @package Smarty
@@ -15,13 +16,13 @@
  * @link http://smarty.php.net/manual/en/language.modifier.count.paragraphs.php
  *          count_sentences (Smarty online manual)
  * @author   Monte Ohrt <monte at ohrt dot com>
- * @param string
- * @return integer
+ * @param mixed $string
+ * @return int
  */
 function smarty_modifier_count_sentences($string)
 {
     // find periods with a word before but not after.
-    return preg_match_all('/[^\s]\.(?!\w)/', $string, $match);
+    return preg_match_all('/[^\s]\.(?!\w)/', (string) $string, $match);
 }
 
 /* vim: set expandtab: */

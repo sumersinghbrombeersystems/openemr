@@ -271,7 +271,7 @@ class FHIRMolecularSequenceVariant extends FHIRBackboneElement implements \JsonS
     /**
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         return $this->get_fhirElementName();
     }
@@ -304,7 +304,7 @@ class FHIRMolecularSequenceVariant extends FHIRBackboneElement implements \JsonS
     }
 
     /**
-     * @param boolean $returnSXE
+     * @param bool $returnSXE
      * @param \SimpleXMLElement $sxe
      * @return string|\SimpleXMLElement
      */

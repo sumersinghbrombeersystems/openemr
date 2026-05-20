@@ -248,7 +248,7 @@ class FHIRSubstanceSpecificationCode extends FHIRBackboneElement implements \Jso
     /**
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         return $this->get_fhirElementName();
     }
@@ -281,7 +281,7 @@ class FHIRSubstanceSpecificationCode extends FHIRBackboneElement implements \Jso
     }
 
     /**
-     * @param boolean $returnSXE
+     * @param bool $returnSXE
      * @param \SimpleXMLElement $sxe
      * @return string|\SimpleXMLElement
      */

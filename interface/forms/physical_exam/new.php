@@ -4,7 +4,7 @@
  * physical_exam new.php
  *
  * @package   OpenEMR
- * @link      http://www.open-emr.org
+ * @link      https://www.open-emr.org
  * @author    Rod Roark <rod@sunsetsystems.com>
  * @author    Brady Miller <brady.g.miller@gmail.com>
  * @copyright Copyright (c) 2006-2010 Rod Roark <rod@sunsetsystems.com>
@@ -13,23 +13,37 @@
  */
 
 require_once(__DIR__ . "/../../globals.php");
+
+use OpenEMR\Common\Csrf\CsrfUtils;
+use OpenEMR\Common\Session\EncounterSessionUtil;
+use OpenEMR\Common\Session\PatientSessionUtil;
+use OpenEMR\Common\Session\SessionWrapperFactory;
+use OpenEMR\Core\Header;
+use OpenEMR\Core\OEGlobalsBag;
+
+// Hoist legacy `globals.php` locals so PHPStan can see them (#11792 Phase 5).
+$srcdir = OEGlobalsBag::getInstance()->getSrcDir();
+$rootdir = OEGlobalsBag::getInstance()->getString('rootdir');
+$pid = PatientSessionUtil::getPid();
+$encounter = EncounterSessionUtil::getEncounter();
+$userauthorized = PatientSessionUtil::getUserAuthorized();
+
 require_once("$srcdir/api.inc.php");
 require_once("$srcdir/forms.inc.php");
 require_once("lines.php");
-
-use OpenEMR\Common\Csrf\CsrfUtils;
-use OpenEMR\Core\Header;
+/** @var array<string, array<string, string>> $pelines (set in lines.php via $GLOBALS) */
 
 if (! $encounter) { // comes from globals.php
     die("Internal error: we do not seem to be in an encounter!");
 }
 
 $returnurl = 'encounter_top.php';
+$session = SessionWrapperFactory::getInstance()->getActiveSession();
 
-function showExamLine($line_id, $description, &$linedbrow, $sysnamedisp)
+function showExamLine($line_id, $description, &$linedbrow, $sysnamedisp): void
 {
     $dres = sqlStatement("SELECT * FROM form_physical_exam_diagnoses " .
-    "WHERE line_id = ? ORDER BY ordering, diagnosis", array($line_id));
+    "WHERE line_id = ? ORDER BY ordering, diagnosis", [$line_id]);
 
     echo " <tr>\n";
     echo "  <td align='center'><input type='checkbox' name='form_obs[" . attr($line_id) . "][wnl]' " .
@@ -68,7 +82,7 @@ function showExamLine($line_id, $description, &$linedbrow, $sysnamedisp)
     echo " </tr>\n";
 }
 
-function showTreatmentLine($line_id, $description, &$linedbrow)
+function showTreatmentLine($line_id, $description, &$linedbrow): void
 {
     echo " <tr>\n";
     echo "  <td align='center'><input type='checkbox' name='form_obs[" . attr($line_id) . "][wnl]' " .
@@ -91,32 +105,30 @@ if ($_POST['bn_save']) {
  // Skip rows that have no entries.
  // There are also 3 special rows with just one checkbox and a text
  // input field.  Maybe also a diagnosis line, not clear.
-    if (!CsrfUtils::verifyCsrfToken($_POST["csrf_token_form"])) {
-        CsrfUtils::csrfNotVerified();
-    }
+    CsrfUtils::checkCsrfInput(INPUT_POST, dieOnFail: true);
 
     if ($formid) {
         $query = "DELETE FROM form_physical_exam WHERE forms_id = ?";
-        sqlStatement($query, array($formid));
+        sqlStatement($query, [$formid]);
     } else {
         $formid = addForm($encounter, "Physical Exam", 0, "physical_exam", $pid, $userauthorized);
         $query = "UPDATE forms SET form_id = id WHERE id = ? AND form_id = 0";
-        sqlStatement($query, array($formid));
+        sqlStatement($query, [$formid]);
     }
 
     $form_obs = $_POST['form_obs'];
     foreach ($form_obs as $line_id => $line_array) {
         $wnl = $line_array['wnl'] ? '1' : '0';
         $abn = $line_array['abn'] ? '1' : '0';
-        $diagnosis = $line_array['diagnosis'] ? $line_array['diagnosis'] : '';
-        $comments  = $line_array['comments']  ? $line_array['comments'] : '';
+        $diagnosis = $line_array['diagnosis'] ?: '';
+        $comments  = $line_array['comments'] ?: '';
         if ($wnl || $abn || $diagnosis || $comments) {
             $query = "INSERT INTO form_physical_exam (
              forms_id, line_id, wnl, abn, diagnosis, comments
              ) VALUES (
              ?, ?, ?, ?, ?, ?
              )";
-            sqlStatement($query, array($formid, $line_id, $wnl, $abn, $diagnosis, $comments));
+            sqlStatement($query, [$formid, $line_id, $wnl, $abn, $diagnosis, $comments]);
         }
     }
 
@@ -130,9 +142,9 @@ if ($_POST['bn_save']) {
 
 // Load all existing rows for this form as a hash keyed on line_id.
 //
-$rows = array();
+$rows = [];
 if ($formid) {
-    $res = sqlStatement("SELECT * FROM form_physical_exam WHERE forms_id = ?", array($formid));
+    $res = sqlStatement("SELECT * FROM form_physical_exam WHERE forms_id = ?", [$formid]);
     while ($row = sqlFetchArray($res)) {
         $rows[$row['line_id']] = $row;
     }
@@ -165,7 +177,7 @@ if ($formid) {
 <body class="body_top">
 <form method="post" action="<?php echo $rootdir ?>/forms/physical_exam/new.php?id=<?php echo attr_url($formid); ?>"
  onsubmit="return top.restoreSession()">
-<input type="hidden" name="csrf_token_form" value="<?php echo attr(CsrfUtils::collectCsrfToken()); ?>" />
+<input type="hidden" name="csrf_token_form" value="<?php echo CsrfUtils::collectCsrfToken(session: $session); ?>" />
 
 <center>
 

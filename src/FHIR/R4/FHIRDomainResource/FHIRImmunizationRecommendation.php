@@ -255,7 +255,7 @@ class FHIRImmunizationRecommendation extends FHIRDomainResource implements \Json
     /**
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         return $this->get_fhirElementName();
     }
@@ -292,7 +292,7 @@ class FHIRImmunizationRecommendation extends FHIRDomainResource implements \Json
     }
 
     /**
-     * @param boolean $returnSXE
+     * @param bool $returnSXE
      * @param \SimpleXMLElement $sxe
      * @return string|\SimpleXMLElement
      */

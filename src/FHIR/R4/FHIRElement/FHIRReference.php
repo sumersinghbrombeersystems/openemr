@@ -220,7 +220,7 @@ The type is the Canonical URL of Resource Definition that is the type this refer
     /**
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         return $this->get_fhirElementName();
     }
@@ -247,7 +247,7 @@ The type is the Canonical URL of Resource Definition that is the type this refer
     }
 
     /**
-     * @param boolean $returnSXE
+     * @param bool $returnSXE
      * @param \SimpleXMLElement $sxe
      * @return string|\SimpleXMLElement
      */

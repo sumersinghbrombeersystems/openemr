@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Smarty plugin
  * @package Smarty
@@ -15,13 +16,13 @@
  * @link http://smarty.php.net/manual/en/language.modifier.count.paragraphs.php
  *          count_paragraphs (Smarty online manual)
  * @author   Monte Ohrt <monte at ohrt dot com>
- * @param string
- * @return integer
+ * @param mixed $string
+ * @return int
  */
 function smarty_modifier_count_paragraphs($string)
 {
     // count \r or \n characters
-    return count(preg_split('/[\r\n]+/', $string));
+    return count(preg_split('/[\r\n]+/', (string) $string));
 }
 
 /* vim: set expandtab: */

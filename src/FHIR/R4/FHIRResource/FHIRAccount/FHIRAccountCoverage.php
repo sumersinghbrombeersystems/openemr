@@ -161,7 +161,7 @@ A coverage may only be responsible for specific types of charges, and the sequen
     /**
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         return $this->get_fhirElementName();
     }
@@ -182,7 +182,7 @@ A coverage may only be responsible for specific types of charges, and the sequen
     }
 
     /**
-     * @param boolean $returnSXE
+     * @param bool $returnSXE
      * @param \SimpleXMLElement $sxe
      * @return string|\SimpleXMLElement
      */

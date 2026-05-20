@@ -208,7 +208,7 @@ class FHIRBiologicallyDerivedProductCollection extends FHIRBackboneElement imple
     /**
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         return $this->get_fhirElementName();
     }
@@ -235,7 +235,7 @@ class FHIRBiologicallyDerivedProductCollection extends FHIRBackboneElement imple
     }
 
     /**
-     * @param boolean $returnSXE
+     * @param bool $returnSXE
      * @param \SimpleXMLElement $sxe
      * @return string|\SimpleXMLElement
      */

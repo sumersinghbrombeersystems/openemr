@@ -124,7 +124,7 @@ class FHIRNamingSystemIdentifierType extends FHIRElement implements \JsonSeriali
     /**
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         return (string)$this->getValue();
     }
@@ -138,7 +138,7 @@ class FHIRNamingSystemIdentifierType extends FHIRElement implements \JsonSeriali
     }
 
     /**
-     * @param boolean $returnSXE
+     * @param bool $returnSXE
      * @param \SimpleXMLElement $sxe
      * @return string|\SimpleXMLElement
      */

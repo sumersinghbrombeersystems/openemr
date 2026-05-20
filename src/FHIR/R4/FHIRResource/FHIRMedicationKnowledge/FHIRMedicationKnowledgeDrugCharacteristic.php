@@ -230,7 +230,7 @@ class FHIRMedicationKnowledgeDrugCharacteristic extends FHIRBackboneElement impl
     /**
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         return $this->get_fhirElementName();
     }
@@ -260,7 +260,7 @@ class FHIRMedicationKnowledgeDrugCharacteristic extends FHIRBackboneElement impl
     }
 
     /**
-     * @param boolean $returnSXE
+     * @param bool $returnSXE
      * @param \SimpleXMLElement $sxe
      * @return string|\SimpleXMLElement
      */

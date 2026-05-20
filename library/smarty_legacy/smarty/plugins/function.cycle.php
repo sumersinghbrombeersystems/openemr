@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Smarty plugin
  * @package Smarty
@@ -37,8 +38,8 @@
  * @author credit to Gerard <gerard@interfold.com>
  * @author credit to Jason Sweat <jsweat_php@yahoo.com>
  * @version  1.3
- * @param array
- * @param Smarty
+ * @param array $params
+ * @param mixed $smarty
  * @return string|null
  */
 function smarty_function_cycle($params, &$smarty)
@@ -66,13 +67,13 @@ function smarty_function_cycle($params, &$smarty)
     if (isset($params['delimiter'])) {
         $cycle_vars[$name]['delimiter'] = $params['delimiter'];
     } elseif (!isset($cycle_vars[$name]['delimiter'])) {
-        $cycle_vars[$name]['delimiter'] = ',';       
+        $cycle_vars[$name]['delimiter'] = ',';
     }
 
     if(is_array($cycle_vars[$name]['values'])) {
         $cycle_array = $cycle_vars[$name]['values'];
     } else {
-        $cycle_array = explode($cycle_vars[$name]['delimiter'],$cycle_vars[$name]['values']);
+        $cycle_array = explode($cycle_vars[$name]['delimiter'],(string) $cycle_vars[$name]['values']);
     }
 
     if(!isset($cycle_vars[$name]['index']) || $reset ) {
@@ -84,11 +85,7 @@ function smarty_function_cycle($params, &$smarty)
         $smarty->assign($params['assign'], $cycle_array[$cycle_vars[$name]['index']]);
     }
 
-    if($print) {
-        $retval = $cycle_array[$cycle_vars[$name]['index']];
-    } else {
-        $retval = null;
-    }
+    $retval = $print ? $cycle_array[$cycle_vars[$name]['index']] : null;
 
     if($advance) {
         if ( $cycle_vars[$name]['index'] >= count($cycle_array) -1 ) {

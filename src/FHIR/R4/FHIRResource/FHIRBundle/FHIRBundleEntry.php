@@ -283,7 +283,7 @@ class FHIRBundleEntry extends FHIRBackboneElement implements \JsonSerializable
     /**
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         return $this->get_fhirElementName();
     }
@@ -319,7 +319,7 @@ class FHIRBundleEntry extends FHIRBackboneElement implements \JsonSerializable
     }
 
     /**
-     * @param boolean $returnSXE
+     * @param bool $returnSXE
      * @param \SimpleXMLElement $sxe
      * @return string|\SimpleXMLElement
      */

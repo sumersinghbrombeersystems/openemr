@@ -263,7 +263,7 @@ class FHIRSubstanceAmount extends FHIRBackboneElement implements \JsonSerializab
     /**
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         return $this->get_fhirElementName();
     }
@@ -297,7 +297,7 @@ class FHIRSubstanceAmount extends FHIRBackboneElement implements \JsonSerializab
     }
 
     /**
-     * @param boolean $returnSXE
+     * @param bool $returnSXE
      * @param \SimpleXMLElement $sxe
      * @return string|\SimpleXMLElement
      */

@@ -23,14 +23,14 @@ use OpenEMR\Core\Header;
  * Name:     headerTemplate<br />
  * Purpose:  headerTemplate in OpenEMR - Smarty templates<br />
  *
- * @param array
- * @param Smarty
+ * @param array $params
+ * @param mixed $smarty
  */
 function smarty_function_headerTemplate($params, &$smarty)
 {
     $assets = [];
     if (!empty($params['assets'])) {
-        $assets = explode('|', $params['assets']);
+        $assets = explode('|', (string) $params['assets']);
     }
 
     return Header::setupHeader($assets);

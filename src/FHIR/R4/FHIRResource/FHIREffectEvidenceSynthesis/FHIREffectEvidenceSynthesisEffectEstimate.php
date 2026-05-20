@@ -277,7 +277,7 @@ class FHIREffectEvidenceSynthesisEffectEstimate extends FHIRBackboneElement impl
     /**
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         return (string)$this->getValue();
     }
@@ -313,7 +313,7 @@ class FHIREffectEvidenceSynthesisEffectEstimate extends FHIRBackboneElement impl
     }
 
     /**
-     * @param boolean $returnSXE
+     * @param bool $returnSXE
      * @param \SimpleXMLElement $sxe
      * @return string|\SimpleXMLElement
      */

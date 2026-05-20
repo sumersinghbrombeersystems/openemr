@@ -29,6 +29,8 @@
 //=================================================================
 //  define constants used to make the code more readable
 //=================================================================
+use OpenEMR\Common\Session\SessionWrapperFactory;
+
 define('_IS_SUNDAY', 0);
 define('_IS_MONDAY', 1);
 define('_IS_SATURDAY', 6);
@@ -133,6 +135,7 @@ define('_SETTING_NOTIFY_EMAIL', pnModGetVar(__POSTCALENDAR__, 'pcNotifyEmail'));
 //  Require and Setup utility classes and functions
 //=========================================================================
 define('DATE_CALC_BEGIN_WEEKDAY', _SETTING_FIRST_DAY_WEEK);
+$pcDir = pnVarPrepForOS(pnModGetInfo(pnModGetIDFromName(__POSTCALENDAR__))['directory']);
 require_once("modules/$pcDir/pnincludes/Date/Calc.php");
 //=========================================================================
 //  grab the global language file
@@ -169,7 +172,7 @@ function &postcalendar_makeValidURL($s)
         return $s;
     }
 
-    if (!preg_match('|^http[s]?:\/\/|i', $s)) {
+    if (!preg_match('|^http[s]?:\/\/|i', (string) $s)) {
         $s = 'http://' . $s;
     }
 
@@ -182,21 +185,19 @@ function postcalendar_removeScriptTags($in)
 
 function postcalendar_getDate($format = 'Ymd')
 {
-    list($Date, $jumpday, $jumpmonth, $jumpyear, $jumpdate) =
+    [$Date, $jumpday, $jumpmonth, $jumpyear, $jumpdate] =
         pnVarCleanFromInput('Date', 'jumpday', 'jumpmonth', 'jumpyear', 'jumpdate');
     if (!isset($Date)) {
         // if we still don't have a date then calculate it
         // check the jump menu, might be a 'jumpdate' input field or m/d/y select lists
         if ($jumpdate) {
-            $jumpyear  = substr($jumpdate, 0, 4);
-            $jumpmonth = substr($jumpdate, 5, 2);
-            $jumpday   = substr($jumpdate, 8, 2);
+            $jumpyear  = substr((string) $jumpdate, 0, 4);
+            $jumpmonth = substr((string) $jumpdate, 5, 2);
+            $jumpday   = substr((string) $jumpdate, 8, 2);
         } else {
-            if (!empty($_SESSION['lastcaldate'])) {
-                $time = strtotime($_SESSION['lastcaldate']);
-            } else {
-                $time = time();
-            }
+            $session = SessionWrapperFactory::getInstance()->getActiveSession();
+            $lastcaldate = $session->get('lastcaldate');
+            $time = !empty($lastcaldate) ? strtotime((string) $lastcaldate) : time();
 
             if (!isset($jumpday)) {
                 $jumpday   = date('d', $time);
@@ -215,9 +216,9 @@ function postcalendar_getDate($format = 'Ymd')
         $Date = (int) "$jumpyear$jumpmonth$jumpday";
     }
 
-    $y = substr($Date, 0, 4);
-    $m = substr($Date, 4, 2);
-    $d = substr($Date, 6, 2);
+    $y = substr((string) $Date, 0, 4);
+    $m = substr((string) $Date, 4, 2);
+    $d = substr((string) $Date, 6, 2);
     OpenEMR\Common\Session\SessionUtil::setSession('lastcaldate', "$y-$m-$d"); // remember the last chosen date
     return date($format, mktime(0, 0, 0, $m, $d, $y));
 }
@@ -264,8 +265,10 @@ function postcalendar_userapi_jsPopup()
 
     define('_POSTCALENDAR_JSPOPUPS_LOADED', true);
 
+    // AI-generated code (GitHub Copilot) - Refactored to use URLSearchParams
     // build the correct link
-    $js_link = "'index.php?module=" . __POSTCALENDAR__ . "&type=user&func=view&viewtype=details&eid='+eid+'&Date='+date+'&popup=1'";
+    $module_name = __POSTCALENDAR__;
+    $js_link_base = "'index.php'";
     $js_window_options = 'toolbar=no,'
                        . 'location=no,'
                        . 'directories=no,'
@@ -282,7 +285,16 @@ function postcalendar_userapi_jsPopup()
 <!--
 function opencal(eid,date) {
     window.name='csCalendar';
-    w = window.open($js_link,'PostCalendarEvents','$js_window_options');
+    const params = new URLSearchParams({
+        module: '$module_name',
+        type: 'user',
+        func: 'view',
+        viewtype: 'details',
+        eid: eid,
+        Date: date,
+        popup: '1'
+    });
+    w = window.open($js_link_base + '?' + params.toString(),'PostCalendarEvents','$js_window_options');
 }
 // -->
 </script>
@@ -376,10 +388,10 @@ function postcalendar_userapi_getmonthname($args)
         return false;
     }
 
-    $month_name = array('01' => _CALJAN, '02' => _CALFEB, '03' => _CALMAR,
+    $month_name = ['01' => _CALJAN, '02' => _CALFEB, '03' => _CALMAR,
                         '04' => _CALAPR, '05' => _CALMAY, '06' => _CALJUN,
                         '07' => _CALJUL, '08' => _CALAUG, '09' => _CALSEP,
-                        '10' => _CALOCT, '11' => _CALNOV, '12' => _CALDEC);
+                        '10' => _CALOCT, '11' => _CALNOV, '12' => _CALDEC];
     return $month_name[date('m', $Date)];
 }
 
@@ -395,7 +407,7 @@ function postcalendar_userapi_buildMonthSelect($args)
     }
 
     // create the return object to be inserted into the form
-    $output = array();
+    $output = [];
     if (!isset($selected)) {
         $selected = '';
     }
@@ -411,7 +423,7 @@ function postcalendar_userapi_buildMonthSelect($args)
 
             $output[$c]['id']       = sprintf('%02d', $i);
             $output[$c]['selected'] = $sel;
-            $output[$c]['name']     = postcalendar_userapi_getmonthname(array('Date' => mktime(0, 0, 0, $i, 15)));
+            $output[$c]['name']     = postcalendar_userapi_getmonthname(['Date' => mktime(0, 0, 0, $i, 15)]);
     }
 
     return $output;
@@ -429,7 +441,7 @@ function postcalendar_userapi_buildDaySelect($args)
     }
 
     // create the return object to be inserted into the form
-    $output = array();
+    $output = [];
     if (!isset($selected)) {
         $selected = '';
     }
@@ -463,7 +475,7 @@ function postcalendar_userapi_buildYearSelect($args)
     }
 
     // create the return object to be inserted into the form
-    $output = array();
+    $output = [];
     // we want the list to contain 10 years before today and 30 years after
     // maybe this will eventually become a user defined value
     $pc_start_year = date('Y') - 1;
@@ -491,7 +503,7 @@ function postcalendar_userapi_buildYearSelect($args)
 
 function &postcalendar_userapi_getCategories()
 {
-    list($dbconn) = pnDBGetConn();
+    $conn = pnDBGetConn();
     $pntable = pnDBGetTables();
     $cat_table = $pntable['postcalendar_categories'];
     $sql = "SELECT pc_catid,pc_catname,pc_constant_id,pc_catcolor,pc_catdesc,
@@ -499,21 +511,17 @@ function &postcalendar_userapi_getCategories()
             pc_dailylimit,pc_end_date_flag,pc_end_date_type,pc_end_date_freq,
             pc_end_all_day,pc_cattype,pc_active,pc_seq,aco_spec FROM $cat_table
             ORDER BY pc_catname";
-    $result = $dbconn->Execute($sql);
-
-    if ($dbconn->ErrorNo() != 0) {
-        return array();
+    try {
+        $result = $conn->executeQuery($sql);
+    } catch (Doctrine\DBAL\Exception) {
+        $categories = [];
+        return $categories;
     }
 
-    if (!isset($result)) {
-        return array();
-    }
-
-    $categories = array();
-    for ($i = 0; !$result->EOF; $result->MoveNext()) {
-        list($catid,$catname,$constantid,$catcolor,$catdesc,
-            $rtype,$rspec,$rfreq,$duration,$limit,$end_date_flag,
-            $end_date_type,$end_date_freq,$end_all_day,$cattype,$active,$seq,$aco) = $result->fields;
+    $categories = [];
+    $i = 0;
+    foreach ($result->iterateNumeric() as $row) {
+        [$catid, $catname, $constantid, $catcolor, $catdesc, $rtype, $rspec, $rfreq, $duration, $limit, $end_date_flag, $end_date_type, $end_date_freq, $end_all_day, $cattype, $active, $seq, $aco] = $row;
 
         $categories[$i]['id']     = $catid;
         $categories[$i]['name']   = $catname;
@@ -542,31 +550,31 @@ function &postcalendar_userapi_getCategories()
         $categories[$i++]['dailylimit'] = $limit;
     }
 
-    $result->Close();
     return $categories;
 }
 
 function &postcalendar_userapi_getTopics()
 {
-    list($dbconn) = pnDBGetConn();
+    $conn = pnDBGetConn();
     $pntable = pnDBGetTables();
     $topics_table = $pntable['topics'];
     $topics_column = &$pntable['topics_column'];
     $sql = "SELECT $topics_column[topicid], $topics_column[topictext], $topics_column[topicname]
             FROM $topics_table
             ORDER BY $topics_column[topictext]";
-    $topiclist = $dbconn->Execute($sql);
-    if ($dbconn->ErrorNo() != 0) {
-        return false;
+    try {
+        $result = $conn->executeQuery($sql);
+    } catch (Doctrine\DBAL\Exception) {
+        $data = false;
+        return $data;
     }
 
-    $data = array();
+    $data = [];
     $i = 0;
-    for (; !$topiclist->EOF; $topiclist->MoveNext()) {
-        list($data[$i]['id'], $data[$i]['text'], $data[$i++]['name']) = $topiclist->fields;
+    foreach ($result->iterateNumeric() as $row) {
+        [$data[$i]['id'], $data[$i]['text'], $data[$i++]['name']] = $row;
     }
 
-    $topiclist->Close();
     return $data;
 }
 
@@ -575,7 +583,7 @@ function findFirstAvailable($period)
     //print_r($period);
 
     $day_date = "";
-    $available_times = array();
+    $available_times = [];
     foreach ($period as $date => $day) {
         //echo "begin free times for $date:<br />";
         $ffid_res = findFirstInDay($day, $date);
@@ -593,7 +601,7 @@ function findFirstAvailable($period)
 
 function findFirstInDay($day, $date)
 {
-    $stack = array();
+    $stack = [];
     $lastcat = 3;
     $intime = false;
     $outtime = false;
@@ -610,7 +618,7 @@ function findFirstInDay($day, $date)
     }
 
     if ($intime == false or $outtime == false) {
-        return array();
+        return [];
     }
 
     //echo "increment is: "  . _SETTING_TIME_INCREMENT . "<br />";
@@ -620,7 +628,7 @@ function findFirstInDay($day, $date)
     $outtime_sec =  date("U", strtotime($date . " " . $outtime));
     $free_time = $intime_sec;
 
-    $times = array();
+    $times = [];
     for ($i = $intime_sec; $i < $outtime_sec; $i += $inc) {
         //echo "time is now: " . date("h:i:s A",$i) . "<br />";
         $closest_start = $outtime_sec;
@@ -682,9 +690,9 @@ function findFirstInDay($day, $date)
             //this happens because people want to be able to set 8:00 - 8:15 and 8:15 - 8:30 without a conflict
             //even though that is technially impossible, so we pretend, however here we weed out the 0
             //length blocks so that won't be seen
-            $date_sec = strtotime($date);
+            $date_sec = strtotime((string) $date);
             if ($duration > 0) {
-                $times[] = array ("startTime" => $free_time, "endTime" => ($date_sec + $duration));
+                $times[] =  ["startTime" => $free_time, "endTime" => ($date_sec + $duration)];
             }
         }
     }
@@ -762,20 +770,20 @@ function sort_byTimeD($a, $b)
 }
 /**
  *    pc_clean
- *    @param s string text to clean
+ *    @param mixed $s string text to clean
  *    @return string cleaned up text
  */
 function pc_clean($s)
 {
-    $display_type = substr($s, 0, 6);
+    $display_type = substr((string) $s, 0, 6);
     if ($display_type == ':text:') {
-        $s = substr($s, 6);
+        $s = substr((string) $s, 6);
     } elseif ($display_type == ':html:') {
-        $s = substr($s, 6);
+        $s = substr((string) $s, 6);
     }
 
     unset($display_type);
-    $s = preg_replace('/[\r|\n]/i', '', $s);
+    $s = preg_replace('/[\r|\n]/i', '', (string) $s);
     $s = str_replace("'", "\'", $s);
     $s = str_replace('"', '&quot;', $s);
     // ok, now we need to break really long lines

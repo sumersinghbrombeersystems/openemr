@@ -6,20 +6,20 @@ use OpenEMR\FHIR\R4\FHIRDomainResource\FHIRPractitioner;
 use OpenEMR\Services\FHIR\FhirPractitionerService;
 use OpenEMR\Services\FHIR\Serialization\FhirPractitionerSerializer;
 use OpenEMR\Tests\Fixtures\PractitionerFixtureManager;
-use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use Psr\Log\LoggerInterface;
 
 /**
  * FHIR Practitioner Service Crud Tests
  *
  * @package   OpenEMR
- * @link      http://www.open-emr.org
+ * @link      https://www.open-emr.org
  * @author    Yash Bothra <yashrajbothra786gmail.com>
  * @copyright Copyright (c) 2020 Yash Bothra <yashrajbothra786gmail.com>
  * @license   https://github.com/openemr/openemr/blob/master/LICENSE GNU General Public License 3
  */
 
-#[CoversClass(FhirPractitionerService::class)]
 class FhirPractitionerServiceCrudTest extends TestCase
 {
     private $fixtureManager;
@@ -41,6 +41,7 @@ class FhirPractitionerServiceCrudTest extends TestCase
         $fixture = (array) $this->fixtureManager->getSingleFhirPractitionerFixture();
         $this->fhirPractitionerFixture = FhirPractitionerSerializer::deserialize($fixture);
         $this->fhirPractitionerService = new FhirPractitionerService();
+        $this->fhirPractitionerService->setSystemLogger($this->createMock(LoggerInterface::class));
     }
 
     protected function tearDown(): void
@@ -49,7 +50,7 @@ class FhirPractitionerServiceCrudTest extends TestCase
     }
 
     #[Test]
-    public function testInsert()
+    public function testInsert(): void
     {
         $this->fhirPractitionerFixture->setId(null);
         $processingResult = $this->fhirPractitionerService->insert($this->fhirPractitionerFixture);
@@ -62,7 +63,7 @@ class FhirPractitionerServiceCrudTest extends TestCase
     }
 
     #[Test]
-    public function testInsertWithErrors()
+    public function testInsertWithErrors(): void
     {
         $this->fhirPractitionerFixture->name = []; // clear the names TODO: I don't like this public accessor, can we fix it?s
         $processingResult = $this->fhirPractitionerService->insert($this->fhirPractitionerFixture);
@@ -71,7 +72,7 @@ class FhirPractitionerServiceCrudTest extends TestCase
     }
 
     #[Test]
-    public function testUpdate()
+    public function testUpdate(): void
     {
         $this->fhirPractitionerFixture->setId(null);
         $processingResult = $this->fhirPractitionerService->insert($this->fhirPractitionerFixture);
@@ -94,7 +95,7 @@ class FhirPractitionerServiceCrudTest extends TestCase
     }
 
     #[Test]
-    public function testUpdateWithErrors()
+    public function testUpdateWithErrors(): void
     {
         $actualResult = $this->fhirPractitionerService->update('bad-uuid', $this->fhirPractitionerFixture);
         $this->assertFalse($actualResult->isValid());

@@ -329,7 +329,7 @@ class FHIRVerificationResultAttestation extends FHIRBackboneElement implements \
     /**
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         return $this->get_fhirElementName();
     }
@@ -368,7 +368,7 @@ class FHIRVerificationResultAttestation extends FHIRBackboneElement implements \
     }
 
     /**
-     * @param boolean $returnSXE
+     * @param bool $returnSXE
      * @param \SimpleXMLElement $sxe
      * @return string|\SimpleXMLElement
      */

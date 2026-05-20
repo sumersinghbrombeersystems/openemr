@@ -16,7 +16,7 @@
  *
  * @package OpenEMR
  * @author  Amiel Elboim <amielel@matrix.co.il>
- * @link    http://www.open-emr.org
+ * @link    https://www.open-emr.org
  */
 
 namespace PrescriptionTemplates;
@@ -36,17 +36,17 @@ class Module
      */
     public function getAutoloaderConfig()
     {
-        return array(
-            'Laminas\Loader\ClassMapAutoloader' => array(
+        return [
+            \Laminas\Loader\ClassMapAutoloader::class => [
                 __DIR__ . '/autoload_classmap.php',
-            ),
-            'Laminas\Loader\StandardAutoloader' => array(
-                'namespaces' => array(
+            ],
+            \Laminas\Loader\StandardAutoloader::class => [
+                'namespaces' => [
                     __NAMESPACE__ => __DIR__ . '/src/' . __NAMESPACE__,
 
-                ),
-            ),
-        );
+                ],
+            ],
+        ];
     }
 
     public function getConfig()

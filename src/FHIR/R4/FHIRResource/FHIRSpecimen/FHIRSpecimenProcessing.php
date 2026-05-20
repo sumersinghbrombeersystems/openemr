@@ -242,7 +242,7 @@ class FHIRSpecimenProcessing extends FHIRBackboneElement implements \JsonSeriali
     /**
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         return $this->get_fhirElementName();
     }
@@ -275,7 +275,7 @@ class FHIRSpecimenProcessing extends FHIRBackboneElement implements \JsonSeriali
     }
 
     /**
-     * @param boolean $returnSXE
+     * @param bool $returnSXE
      * @param \SimpleXMLElement $sxe
      * @return string|\SimpleXMLElement
      */

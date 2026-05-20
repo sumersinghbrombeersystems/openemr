@@ -3,12 +3,14 @@
 /**
  *
  * @package OpenEMR
- * @link    http://www.open-emr.org
+ * @link    https://www.open-emr.org
  *
  * @author    Brad Sharp <brad.sharp@claimrev.com>
  * @copyright Copyright (c) 2022 Brad Sharp <brad.sharp@claimrev.com>
  * @license   https://github.com/openemr/openemr/blob/master/LICENSE GNU General Public License 3
  */
+
+/** @var \stdClass $benefit */
 
 if ($benefit->benefitAdditionalInfos != null && $benefit->benefitAdditionalInfos) {
     ?>
@@ -24,7 +26,7 @@ if ($benefit->benefitAdditionalInfos != null && $benefit->benefitAdditionalInfos
                             <dl class="row">
                                 <dt class="col">
                     <?php echo xlt("Codes"); ?>
-                                    
+
                                 </dt>
                                 <dd class="col">
                     <?php echo text($ba->codeListQualifier);?> <?php echo text($ba->industryCode);?> <?php echo text($ba->categoryCode); ?>
@@ -36,10 +38,10 @@ if ($benefit->benefitAdditionalInfos != null && $benefit->benefitAdditionalInfos
             ?>
                             <dl class="row">
                             <dt class="col">
-                <?php echo xlt("Message"); ?>                                
+                <?php echo xlt("Message"); ?>
                             </dt>
                             <dd class="col">
-                <?php echo text($ba->messageText);?>                                              
+                <?php echo text($ba->messageText);?>
                             </dd>
                         <dl>
             <?php
@@ -55,4 +57,3 @@ if ($benefit->benefitAdditionalInfos != null && $benefit->benefitAdditionalInfos
 
     <?php
 }
-

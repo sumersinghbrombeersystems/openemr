@@ -441,7 +441,7 @@ class FHIRAccount extends FHIRDomainResource implements \JsonSerializable
     /**
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         return $this->get_fhirElementName();
     }
@@ -502,7 +502,7 @@ class FHIRAccount extends FHIRDomainResource implements \JsonSerializable
     }
 
     /**
-     * @param boolean $returnSXE
+     * @param bool $returnSXE
      * @param \SimpleXMLElement $sxe
      * @return string|\SimpleXMLElement
      */

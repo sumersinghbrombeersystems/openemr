@@ -306,7 +306,7 @@ class FHIRMedicinalProductPharmaceuticalRouteOfAdministration extends FHIRBackbo
     /**
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         return $this->get_fhirElementName();
     }
@@ -345,7 +345,7 @@ class FHIRMedicinalProductPharmaceuticalRouteOfAdministration extends FHIRBackbo
     }
 
     /**
-     * @param boolean $returnSXE
+     * @param bool $returnSXE
      * @param \SimpleXMLElement $sxe
      * @return string|\SimpleXMLElement
      */

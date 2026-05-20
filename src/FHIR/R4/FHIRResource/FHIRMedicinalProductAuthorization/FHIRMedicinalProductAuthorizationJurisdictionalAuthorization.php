@@ -254,7 +254,7 @@ class FHIRMedicinalProductAuthorizationJurisdictionalAuthorization extends FHIRB
     /**
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         return $this->get_fhirElementName();
     }
@@ -290,7 +290,7 @@ class FHIRMedicinalProductAuthorizationJurisdictionalAuthorization extends FHIRB
     }
 
     /**
-     * @param boolean $returnSXE
+     * @param bool $returnSXE
      * @param \SimpleXMLElement $sxe
      * @return string|\SimpleXMLElement
      */

@@ -499,7 +499,7 @@ class FHIRObservationDefinition extends FHIRDomainResource implements \JsonSeria
     /**
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         return $this->get_fhirElementName();
     }
@@ -566,7 +566,7 @@ class FHIRObservationDefinition extends FHIRDomainResource implements \JsonSeria
     }
 
     /**
-     * @param boolean $returnSXE
+     * @param bool $returnSXE
      * @param \SimpleXMLElement $sxe
      * @return string|\SimpleXMLElement
      */

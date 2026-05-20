@@ -395,7 +395,7 @@ class FHIRMedicinalProductPackaged extends FHIRDomainResource implements \JsonSe
     /**
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         return $this->get_fhirElementName();
     }
@@ -456,7 +456,7 @@ class FHIRMedicinalProductPackaged extends FHIRDomainResource implements \JsonSe
     }
 
     /**
-     * @param boolean $returnSXE
+     * @param bool $returnSXE
      * @param \SimpleXMLElement $sxe
      * @return string|\SimpleXMLElement
      */

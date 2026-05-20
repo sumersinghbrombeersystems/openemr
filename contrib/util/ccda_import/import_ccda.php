@@ -36,8 +36,10 @@
  * @license   https://github.com/openemr/openemr/blob/master/LICENSE GNU General Public License 3
  */
 
-// comment this out when using this script (and then uncomment it again when done using script)
-exit;
+// Enable this script via environment variable
+if (!getenv('OPENEMR_ENABLE_CCDA_IMPORT')) {
+    die('Set OPENEMR_ENABLE_CCDA_IMPORT=1 environment variable to enable this script');
+}
 
 // only allow use from command line
 if (php_sapi_name() !== 'cli') {
@@ -48,8 +50,8 @@ function parseArgs($argv): array
 {
     $args = [];
     foreach ($argv as $arg) {
-        if (str_starts_with($arg, '--')) {
-            list($key, $value) = explode('=', substr($arg, 2), 2) + [1 => null];
+        if (str_starts_with((string) $arg, '--')) {
+            [$key, $value] = explode('=', substr((string) $arg, 2), 2) + [1 => null];
             if ($key === 'help') {
                 showHelp();
             }
@@ -94,7 +96,7 @@ function outputMessage($message): void
 }
 
 // collect parameters (need to do before globals)
-$args = parseArgs($argv);
+$args = parseArgs($argv ?? []);
 
 // Required arguments
 $requiredArgs = ['sourcePath', 'site', 'openemrPath'];
@@ -107,15 +109,15 @@ foreach ($requiredArgs as $req) {
     }
 }
 
-$dir = rtrim($args['sourcePath'], '/') . '/*';
+$dir = rtrim((string) $args['sourcePath'], '/') . '/*';
 $_GET['site'] = $args['site'] ?? 'default';
 $openemrPath = $args['openemrPath'] ?? '';
 $seriousOptimizeFlag = filter_var($args['isDev'] ?? true, FILTER_VALIDATE_BOOLEAN); // default to true/on
 $enableMoves = filter_var($args['enableMoves'] ?? false, FILTER_VALIDATE_BOOLEAN); // default to false/off
 $dedup = filter_var($args['dedup'] ?? false, FILTER_VALIDATE_BOOLEAN); // default to false/off
 $authName = $args['authName'] ?? '';
-$processedDir = rtrim($args['sourcePath'], '/') . "/processed";
-$duplicateDir = rtrim($args['sourcePath'], '/') . "/duplicates";
+$processedDir = rtrim((string) $args['sourcePath'], '/') . "/processed";
+$duplicateDir = rtrim((string) $args['sourcePath'], '/') . "/duplicates";
 $seriousOptimize = false;
 if ($seriousOptimizeFlag == "true") {
     $seriousOptimize = true;
@@ -124,13 +126,16 @@ if ($seriousOptimizeFlag == "true") {
 $ignoreAuth = 1;
 require_once($openemrPath . "/interface/globals.php");
 
+use OpenEMR\Common\Session\SessionWrapperFactory;
 use OpenEMR\Common\Uuid\UuidRegistry;
 use OpenEMR\Services\Cda\CdaComponentParseHelpers;
+
+$session = SessionWrapperFactory::getInstance()->getActiveSession();
 
 // show parameters (need to do after globals)
 outputMessage("OpenEMR path: " . $openemrPath);
 outputMessage("CCDA Imports Location: " . $args['sourcePath']);
-outputMessage("Site: " . $_SESSION['site_id']);
+outputMessage("Site: " . $session->get('site_id'));
 
 if ($seriousOptimize) {
     outputMessage("Development Mode is ON (performance mode)\n");
@@ -159,7 +164,7 @@ foreach (glob($dir) as $file) {
         if ($dedup) {
             $patientData = CdaComponentParseHelpers::parseCcdaPatientRole($file);
             if (empty($patientData)) {
-                echo outputMessage("File load issue. Skipping: " . text($file) . "\n");
+                outputMessage("File load issue. Skipping: " . text($file) . "\n");
                 continue;
             }
             $duplicates = CdaComponentParseHelpers::checkDuplicatePatient($patientData);
@@ -168,18 +173,18 @@ foreach (glob($dir) as $file) {
                     CdaComponentParseHelpers::moveToDuplicateDir($file, $duplicateDir);
                 }
                 $dups = count(($duplicates ?? []));
-                echo outputMessage("Patient is duplicated " . text($dups) . " times. Patient skipped: " . json_encode($duplicates[0]) . "\n");
+                outputMessage("Patient is duplicated " . text($dups) . " times. Patient skipped: " . json_encode($duplicates[0]) . "\n");
                 continue;
             }
         }
-    } catch (Exception $e) {
+    } catch (\Throwable $e) {
         echo "Error: " . $e->getMessage();
     }
     //  1. import ccda document (bypassed in development-mode)
     if ($seriousOptimize) {
         // development-mode is on (note step 1 and step 2 are bypassed)
         // 3. import as new patient
-        exec("php " . $openemrPath . "/bin/console openemr:ccda-newpatient-import --site=" . $_SESSION['site_id'] . " --document=" . $file);
+        exec("php " . $openemrPath . "/bin/console openemr:ccda-newpatient-import --site=" . $session->get('site_id') . " --document=" . $file);
     } else {
         // development mode is off
         //  1. import ccda document
@@ -189,17 +194,17 @@ foreach (glob($dir) as $file) {
         $document->createDocument('00', 13, basename($file), 'text/xml', $fileContents);
         $documentId = $document->get_id();
         //  2. import to ccda table
-        exec("php " . $openemrPath . "/bin/console openemr:ccda-import --site=" . $_SESSION['site_id'] . " --document_id=" . $documentId . " --auth_name=" . $authName);
+        exec("php " . $openemrPath . "/bin/console openemr:ccda-import --site=" . $session->get('site_id') . " --document_id=" . $documentId . " --auth_name=" . $authName);
         $auditId = sqlQueryNoLog("SELECT max(`id`) as `maxid` FROM `audit_master`")['maxid'];
         //  3. import as new patient
-        exec("php " . $openemrPath . "/bin/console openemr:ccda-newpatient --site=" . $_SESSION['site_id'] . " --am_id=" . $auditId . " --document_id=" . $documentId . " --auth_name=" . $authName);
+        exec("php " . $openemrPath . "/bin/console openemr:ccda-newpatient --site=" . $session->get('site_id') . " --am_id=" . $auditId . " --document_id=" . $documentId . " --auth_name=" . $authName);
     }
     try {
         if ($enableMoves) {
             // move the C-CDA XML to the processed directory
             CdaComponentParseHelpers::moveToDuplicateDir($file, $processedDir);
         }
-    } catch (Exception $e) {
+    } catch (\Throwable $e) {
         outputMessage("Error moving file: " . $e->getMessage() . "\n");
     }
     // Keep alive the notifications
@@ -216,12 +221,12 @@ foreach (glob($dir) as $file) {
 }
 $timeSec = round(((round(microtime(true) * 1000)) - $millisecondsStart) / 1000);
 if ($counter > 0) {
-    echo outputMessage("Completed patients import (" . $counter . " patients) (" . $timeSec . " total seconds) (" . (($timeSec) / $counter) . " average seconds per patient)");
-//  4. run function to populate all the uuids via the universal service function that already exists
-    echo outputMessage("Started uuid creation");
+    outputMessage("Completed patients import (" . $counter . " patients) (" . $timeSec . " total seconds) (" . (($timeSec) / $counter) . " average seconds per patient)");
+    //  4. run function to populate all the uuids via the universal service function that already exists
+    outputMessage("Started uuid creation");
     UuidRegistry::populateAllMissingUuids(false);
     $timeSec = round(((round(microtime(true) * 1000)) - $millisecondsStart) / 1000);
-    echo outputMessage("Completed uuid creation (" . $timeSec . " total seconds; " . $timeSec / 3600 . " total hours)\n");
+    outputMessage("Completed uuid creation (" . $timeSec . " total seconds; " . $timeSec / 3600 . " total hours)\n");
 }
 
 outputMessage("Finished patients import" . " $counter\n");

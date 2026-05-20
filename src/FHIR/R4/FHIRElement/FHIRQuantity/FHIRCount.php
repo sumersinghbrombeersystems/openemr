@@ -98,7 +98,7 @@ class FHIRCount extends FHIRQuantity implements \JsonSerializable
     /**
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         return $this->get_fhirElementName();
     }
@@ -113,7 +113,7 @@ class FHIRCount extends FHIRQuantity implements \JsonSerializable
     }
 
     /**
-     * @param boolean $returnSXE
+     * @param bool $returnSXE
      * @param \SimpleXMLElement $sxe
      * @return string|\SimpleXMLElement
      */

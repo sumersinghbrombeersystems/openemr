@@ -632,7 +632,7 @@ class FHIRCapabilityStatementResource extends FHIRBackboneElement implements \Js
     /**
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         return $this->get_fhirElementName();
     }
@@ -719,7 +719,7 @@ class FHIRCapabilityStatementResource extends FHIRBackboneElement implements \Js
     }
 
     /**
-     * @param boolean $returnSXE
+     * @param bool $returnSXE
      * @param \SimpleXMLElement $sxe
      * @return string|\SimpleXMLElement
      */

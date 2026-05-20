@@ -19,7 +19,7 @@ interface IDataDriver
 {
     /**
      * returns a string to identify the type of server
-     * supported in the implemenation
+     * supported in the implementation
      *
      * @return string
      */
@@ -28,9 +28,8 @@ interface IDataDriver
     /**
      * Return true if the given connection is live
      *
-     * @param
-     *          $connection
-     * @return bool;
+     * @param $connection
+     * @return bool
      */
     function Ping($connection);
 
@@ -54,18 +53,15 @@ interface IDataDriver
     /**
      * Close the given connection reference
      *
-     * @param
-     *          connection
+     * @param mixed $connection
      */
     function Close($connection);
 
     /**
      * Execute a SQL query that is expected to return a resultset
      *
-     * @param
-     *          connection
-     * @param
-     *          string sql query
+     * @param mixed $connection
+     * @param string $sql sql query
      * @return resultset
      */
     function Query($connection, $sql);
@@ -73,22 +69,18 @@ interface IDataDriver
     /**
      * Executes a SQL query that does not return a resultset, such as an insert or update
      *
-     * @param
-     *          connection
-     * @param
-     *          string sql statement
+     * @param mixed $connection
+     * @param string $sql sql statement
      * @return int number of affected records
      */
     function Execute($connection, $sql);
 
     /**
-     * Moves the database curser forward and returns the current row as an associative array
+     * Moves the database cursor forward and returns the current row as an associative array
      * When no more data is available, null is returned
      *
-     * @param
-     *          connection
-     * @param
-     *          resultset
+     * @param mixed $connection
+     * @param mixed $rs
      * @return array (or null)
      */
     function Fetch($connection, $rs);
@@ -97,8 +89,7 @@ interface IDataDriver
      * Returns the last auto-insert id that was inserted for the
      * given connection reference
      *
-     * @param
-     *          connection
+     * @param mixed $connection
      */
     function GetLastInsertId($connection);
 
@@ -106,27 +97,23 @@ interface IDataDriver
      * Returns the last error message that the server encountered
      * for the given connection reference
      *
-     * @param
-     *          connection
+     * @param mixed $connection
      */
     function GetLastError($connection);
 
     /**
      * Releases the resources for the given resultset.
      *
-     * @param
-     *          connection
-     * @param
-     *          resultset
+     * @param mixed $connection
+     * @param mixed $rs
      */
     function Release($connection, $rs);
 
     /**
-     * Remove or escape any characters that will cause a SQL statment
+     * Remove or escape any characters that will cause a SQL statement
      * to crash or cause an injection exploit
      *
-     * @param
-     *          string value to escape
+     * @param string $val value to escape
      * @return string value after escaping
      */
     function Escape($val);
@@ -135,8 +122,7 @@ interface IDataDriver
      * Return a stringified version of $val ready to insert with appropriate quoting and escaping
      * This method must handle at a minimum: strings, numbers, NULL and ISqlFunction objects
      *
-     * @param
-     *          variant value to insert/update/query
+     * @param mixed $val value to insert/update/query
      * @return string value ready to use in a SQL statement quoted and escaped if necessary
      */
     function GetQuotedSql($val);
@@ -144,46 +130,39 @@ interface IDataDriver
     /**
      * Returns an array of tablenames for the given database
      *
-     * @param
-     *          mixed connection reference
-     * @param
-     *          string name of the database
+     * @param mixed $connection connection reference
+     * @param string $dbname name of the database
      * @param $ommitEmptyTables (default
-     *          false) set to true and tables with no data will be ommitted
+     *          false) set to true and tables with no data will be omitted
      */
     function GetTableNames($connection, $dbname, $ommitEmptyTables = false);
 
     /**
      * Optimize, clean, defrag or whatever action is relevant for the database server
      *
-     * @param
-     *          mixes connection reference
-     * @param
-     *          string name of table to optimize
+     * @param mixed $connection connection reference
+     * @param string $table name of table to optimize
      */
     function Optimize($connection, $table);
 
     /**
      * Start a database transaction and disable auto-commit if necessary
      *
-     * @param
-     *          mixed connection reference
+     * @param mixed $connection connection reference
      */
     function StartTransaction($connection);
 
     /**
      * Commit the current database transaction and re-enable auto-commit
      *
-     * @param
-     *          mixed connection reference
+     * @param mixed $connection connection reference
      */
     function CommitTransaction($connection);
 
     /**
      * Rollback the current database transaction and re-enable auto-commit
      *
-     * @param
-     *          mixed connection reference
+     * @param mixed $connection connection reference
      */
     function RollbackTransaction($connection);
 }

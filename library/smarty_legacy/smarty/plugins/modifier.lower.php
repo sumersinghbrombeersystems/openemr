@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Smarty plugin
  * @package Smarty
@@ -15,12 +16,12 @@
  * @link http://smarty.php.net/manual/en/language.modifier.lower.php
  *          lower (Smarty online manual)
  * @author   Monte Ohrt <monte at ohrt dot com>
- * @param string
+ * @param mixed $string
  * @return string
  */
 function smarty_modifier_lower($string)
 {
-    return strtolower($string);
+    return strtolower((string) $string);
 }
 
 ?>

@@ -40,46 +40,46 @@ class Cache_Lite
     *
     * @var string $_cacheDir
     */
-    var $_cacheDir = '/tmp/';
+    public $_cacheDir = '/tmp/';
 
     /**
     * Enable / disable caching
     *
     * (can be very usefull for the debug of cached scripts)
     *
-    * @var boolean $_caching
+    * @var bool $_caching
     */
-    var $_caching = true;
+    public $_caching = true;
 
     /**
     * Cache lifetime (in seconds)
     *
     * @var int $_lifeTime
     */
-    var $_lifeTime = 3600;
+    public $_lifeTime = 3600;
 
     /**
     * Enable / disable fileLocking
     *
     * (can avoid cache corruption under bad circumstances)
     *
-    * @var boolean $_fileLocking
+    * @var bool $_fileLocking
     */
-    var $_fileLocking = true;
+    public $_fileLocking = true;
 
     /**
     * Timestamp of the last valid cache
     *
     * @var int $_refreshTime
     */
-    var $_refreshTime;
+    public $_refreshTime;
 
     /**
     * File name (with path)
     *
     * @var string $_file
     */
-    var $_file;
+    public $_file;
 
     /**
     * Enable / disable write control (the cache is read just after writing to detect corrupt entries)
@@ -87,9 +87,9 @@ class Cache_Lite
     * Enable write control will lightly slow the cache writing but not the cache reading
     * Write control can detect some corrupt cache files but maybe it's not a perfect control
     *
-    * @var boolean $_writeControl
+    * @var bool $_writeControl
     */
-    var $_writeControl = true;
+    public $_writeControl = true;
 
     /**
     * Enable / disable read control
@@ -97,9 +97,9 @@ class Cache_Lite
     * If enabled, a control key is embeded in cache file and this key is compared with the one
     * calculated after the reading.
     *
-    * @var boolean $_writeControl
+    * @var bool $_writeControl
     */
-    var $_readControl = true;
+    public $_readControl = true;
 
     /**
     * Type of read control (only if read control is enabled)
@@ -109,9 +109,9 @@ class Cache_Lite
     * 'crc32' for a crc32 hash control (lightly less safe but faster, better choice)
     * 'strlen' for a length only test (fastest)
     *
-    * @var boolean $_readControlType
+    * @var bool $_readControlType
     */
-    var $_readControlType = 'crc32';
+    public $_readControlType = 'crc32';
 
     /**
     * Pear error mode (when raiseError is called)
@@ -121,59 +121,59 @@ class Cache_Lite
     * @see setToDebug()
     * @var int $_pearErrorMode
     */
-    var $_pearErrorMode = CACHE_LITE_ERROR_RETURN;
+    public $_pearErrorMode = CACHE_LITE_ERROR_RETURN;
 
     /**
     * Current cache id
     *
     * @var string $_id
     */
-    var $_id;
+    public $_id;
 
     /**
     * Current cache group
     *
     * @var string $_group
     */
-    var $_group;
+    public $_group;
 
     /**
     * Enable / Disable "Memory Caching"
     *
     * NB : There is no lifetime for memory caching !
     *
-    * @var boolean $_memoryCaching
+    * @var bool $_memoryCaching
     */
-    var $_memoryCaching = false;
+    public $_memoryCaching = false;
 
     /**
     * Enable / Disable "Only Memory Caching"
     * (be carefull, memory caching is "beta quality")
     *
-    * @var boolean $_onlyMemoryCaching
+    * @var bool $_onlyMemoryCaching
     */
-    var $_onlyMemoryCaching = false;
+    public $_onlyMemoryCaching = false;
 
     /**
     * Memory caching array
     *
     * @var array $_memoryCachingArray
     */
-    var $_memoryCachingArray = array();
+    public $_memoryCachingArray = [];
 
     /**
     * Memory caching counter
     *
     * @var int $memoryCachingCounter
     */
-    var $_memoryCachingCounter = 0;
+    public $_memoryCachingCounter = 0;
 
     /**
     * Memory caching limit
     *
     * @var int $memoryCachingLimit
     */
-    var $_memoryCachingLimit = 1000;
+    public $_memoryCachingLimit = 1000;
 
     /**
     * File Name protection
@@ -183,9 +183,9 @@ class Cache_Lite
     * will be used directly in cache file names so be carefull with
     * special characters...
     *
-    * @var boolean $fileNameProtection
+    * @var bool $fileNameProtection
     */
-    var $_fileNameProtection = true;
+    public $_fileNameProtection = true;
 
     /**
     * Enable / disable automatic serialization
@@ -193,9 +193,9 @@ class Cache_Lite
     * it can be used to save directly datas which aren't strings
     * (but it's slower)
     *
-    * @var boolean $_serialize
+    * @var bool $_serialize
     */
-    var $_automaticSerialization = false;
+    public $_automaticSerialization = false;
 
     // --- Public methods ---
 
@@ -222,9 +222,9 @@ class Cache_Lite
     * @param array $options options
     * @access public
     */
-    function __construct($options = array(NULL))
+    function __construct($options = [NULL])
     {
-        $availableOptions = array('automaticSerialization', 'fileNameProtection', 'memoryCaching', 'onlyMemoryCaching', 'memoryCachingLimit', 'cacheDir', 'caching', 'lifeTime', 'fileLocking', 'writeControl', 'readControl', 'readControlType', 'pearErrorMode');
+        $availableOptions = ['automaticSerialization', 'fileNameProtection', 'memoryCaching', 'onlyMemoryCaching', 'memoryCachingLimit', 'cacheDir', 'caching', 'lifeTime', 'fileLocking', 'writeControl', 'readControl', 'readControlType', 'pearErrorMode'];
         foreach($options as $key => $value) {
             if(in_array($key, $availableOptions)) {
                 $property = '_'.$key;
@@ -239,7 +239,7 @@ class Cache_Lite
     *
     * @param string $id cache id
     * @param string $group name of the cache group
-    * @param boolean $doNotTestCacheValidity if set to true, the cache validity won't be tested
+    * @param bool $doNotTestCacheValidity if set to true, the cache validity won't be tested
     * @return string data of the cache (or false if no cache available)
     * @access public
     */
@@ -253,7 +253,7 @@ class Cache_Lite
             if ($this->_memoryCaching) {
                 if (isset($this->_memoryCachingArray[$this->_file])) {
                     if ($this->_automaticSerialization) {
-                        return unserialize($this->_memoryCachingArray[$this->_file]);
+                        return unserialize($this->_memoryCachingArray[$this->_file], ['allowed_classes' => false]);
                     } else {
                         return $this->_memoryCachingArray[$this->_file];
                     }
@@ -276,7 +276,7 @@ class Cache_Lite
                 $this->_memoryCacheAdd($this->_file, $data);
             }
             if (($this->_automaticSerialization) and (is_string($data))) {
-                $data = unserialize($data);
+                $data = unserialize($data, ['allowed_classes' => false]);
             }
             return $data;
         }
@@ -289,7 +289,7 @@ class Cache_Lite
     * @param string $data data to put in cache (can be another type than strings if automaticSerialization is on)
     * @param string $id cache id
     * @param string $group name of the cache group
-    * @return boolean true if no problem
+    * @return bool true if no problem
     * @access public
     */
     function save($data, $id = NULL, $group = 'default')
@@ -326,7 +326,7 @@ class Cache_Lite
     *
     * @param string $id cache id
     * @param string $group name of the cache group
-    * @return boolean true if no problem
+    * @return bool true if no problem
     * @access public
     */
     function remove($id, $group = 'default')
@@ -355,7 +355,7 @@ class Cache_Lite
     * else only cache files of the specified group will be destroyed
     *
     * @param string $group name of the cache group
-    * @return boolean true if no problem
+    * @return bool true if no problem
     * @access public
     */
     function clean($group = false)
@@ -367,7 +367,7 @@ class Cache_Lite
         }
         if ($this->_memoryCaching) {
             foreach ($this->_memoryCachingArray as $key => $value) {
-                if (strpos($key, $motif, 0)) {
+                if (strpos((string) $key, $motif, 0)) {
                     unset($this->_memoryCachingArray[$key]);
                     $this->_memoryCachingCounter -= 1;
                 }
@@ -428,10 +428,10 @@ class Cache_Lite
     function saveMemoryCachingState($id, $group = 'default')
     {
         if ($this->_caching) {
-            $array = array(
+            $array = [
                 'counter' => $this->_memoryCachingCounter,
                 'array' => $this->_memoryCachingState
-            );
+            ];
             $data = serialize($array);
             $this->save($data, $id, $group);
         }
@@ -445,7 +445,7 @@ class Cache_Lite
     {
         if ($this->_caching) {
             if ($data = $this->get($id, $group, $doNotTestCacheValidity)) {
-                $array = unserialize($data);
+                $array = unserialize($data, ['allowed_classes' => false]);
                 $this->_memoryCachingCounter = $array['counter'];
                 $this->_memoryCachingArray = $array['array'];
             }
@@ -472,11 +472,14 @@ class Cache_Lite
     *
     * @param string $msg error message
     * @param int $code error code
+    * @throws PEAR_Error
+    * @return never
     * @access public
     */
     function raiseError($msg, $code)
     {
         include_once('PEAR.php');
+        /** @phpstan-ignore-next-line */
         PEAR::raiseError($msg, $code, $this->_pearErrorMode);
     }
 
@@ -527,14 +530,11 @@ class Cache_Lite
         if ($fp) {
             clearstatcache(); // because the filesize can be cached by PHP itself...
             $length = @filesize($this->_file);
-            $mqr = get_magic_quotes_runtime();
-            set_magic_quotes_runtime(0);
             if ($this->_readControl) {
                 $hashControl = @fread($fp, 32);
                 $length -= 32;
             }
             $data = @fread($fp, $length);
-            set_magic_quotes_runtime($mqr);
             if ($this->_fileLocking) @flock($fp, LOCK_UN);
             @fclose($fp);
             if ($this->_readControl) {
@@ -554,7 +554,7 @@ class Cache_Lite
     * Write the given data in the cache file
     *
     * @param string $data data to put in cache
-    * @return boolean true if ok
+    * @return bool true if ok
     * @access private
     */
     function _write($data)
@@ -579,13 +579,13 @@ class Cache_Lite
     * Write the given data in the cache file and control it just after to avoir corrupted cache entries
     *
     * @param string $data data to put in cache
-    * @return boolean true if the test is ok
+    * @return bool true if the test is ok
     * @access private
     */
     function _writeAndControl($data)
     {
         $this->_write($data);
-        $dataRead = $this->_read($data);
+        $dataRead = $this->_read();
         return ($dataRead==$data);
     }
 
@@ -600,14 +600,14 @@ class Cache_Lite
     function _hash($data, $controlType)
     {
         switch ($controlType) {
-        case 'md5':
+            case 'md5':
             return md5($data);
-        case 'crc32':
+            case 'crc32':
             return sprintf('% 32d', crc32($data));
-        case 'strlen':
+            case 'strlen':
             return sprintf('% 32d', strlen($data));
-        default:
-            $this->raiseError('Unknown controlType ! (available values are only \'md5\', \'crc32\', \'strlen\')', -5);
+            default:
+                $this->raiseError('Unknown controlType ! (available values are only \'md5\', \'crc32\', \'strlen\')', -5);
         }
     }
 

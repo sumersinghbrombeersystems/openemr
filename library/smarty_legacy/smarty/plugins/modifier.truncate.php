@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Smarty plugin
  * @package Smarty
@@ -17,11 +18,11 @@
  * @link http://smarty.php.net/manual/en/language.modifier.truncate.php
  *          truncate (Smarty online manual)
  * @author   Monte Ohrt <monte at ohrt dot com>
- * @param string
- * @param integer
- * @param string
- * @param boolean
- * @param boolean
+ * @param string $string
+ * @param int $length
+ * @param string $etc
+ * @param bool $break_words
+ * @param bool $middle
  * @return string
  */
 function smarty_modifier_truncate($string, $length = 80, $etc = '...',
@@ -30,15 +31,15 @@ function smarty_modifier_truncate($string, $length = 80, $etc = '...',
     if ($length == 0)
         return '';
 
-    if (strlen($string) > $length) {
-        $length -= min($length, strlen($etc));
+    if (strlen((string) $string) > $length) {
+        $length -= min($length, strlen((string) $etc));
         if (!$break_words && !$middle) {
-            $string = preg_replace('/\s+?(\S+)?$/', '', substr($string, 0, $length+1));
+            $string = preg_replace('/\s+?(\S+)?$/', '', substr((string) $string, 0, $length+1));
         }
         if(!$middle) {
-            return substr($string, 0, $length) . $etc;
+            return substr((string) $string, 0, $length) . $etc;
         } else {
-            return substr($string, 0, $length/2) . $etc . substr($string, -$length/2);
+            return substr((string) $string, 0, $length/2) . $etc . substr((string) $string, -$length/2);
         }
     } else {
         return $string;

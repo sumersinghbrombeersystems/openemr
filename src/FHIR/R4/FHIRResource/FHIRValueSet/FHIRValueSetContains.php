@@ -341,7 +341,7 @@ class FHIRValueSetContains extends FHIRBackboneElement implements \JsonSerializa
     /**
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         return $this->get_fhirElementName();
     }
@@ -386,7 +386,7 @@ class FHIRValueSetContains extends FHIRBackboneElement implements \JsonSerializa
     }
 
     /**
-     * @param boolean $returnSXE
+     * @param bool $returnSXE
      * @param \SimpleXMLElement $sxe
      * @return string|\SimpleXMLElement
      */

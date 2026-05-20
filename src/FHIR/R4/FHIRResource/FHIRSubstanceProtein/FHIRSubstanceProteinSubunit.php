@@ -329,7 +329,7 @@ class FHIRSubstanceProteinSubunit extends FHIRBackboneElement implements \JsonSe
     /**
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         return $this->get_fhirElementName();
     }
@@ -368,7 +368,7 @@ class FHIRSubstanceProteinSubunit extends FHIRBackboneElement implements \JsonSe
     }
 
     /**
-     * @param boolean $returnSXE
+     * @param bool $returnSXE
      * @param \SimpleXMLElement $sxe
      * @return string|\SimpleXMLElement
      */

@@ -35,12 +35,9 @@ class DecisionSupportInterventionService extends BaseService
 
     private bool $inNestedTransaction = false;
 
-    protected ?ClientRepository $clientRepository = null;
-
-    public function __construct(?ClientRepository $clientRepository = null)
+    public function __construct(protected ?ClientRepository $clientRepository = null)
     {
         parent::__construct(self::TABLE_NAME);
-        $this->clientRepository = $clientRepository;
     }
 
     public function setClientRepository(ClientRepository $clientRepository)
@@ -93,13 +90,11 @@ class DecisionSupportInterventionService extends BaseService
 
     public function getEmptyService(int $type): DecisionSupportInterventionEntity
     {
-        if ($type === ClientEntity::DSI_TYPE_PREDICTIVE) {
-            $service = new PredictiveDSIServiceEntity();
-            $attributes = $this->getPredictiveDSIAttributes();
-        } else if ($type === ClientEntity::DSI_TYPE_EVIDENCE) {
-            $service = new EvidenceBasedDSIServiceEntity();
-            $attributes = $this->getEvidenceDSIAttributes();
-        }
+        [$service, $attributes] = match ($type) {
+            ClientEntity::DSI_TYPE_PREDICTIVE => [new PredictiveDSIServiceEntity(), $this->getPredictiveDSIAttributes()],
+            ClientEntity::DSI_TYPE_EVIDENCE => [new EvidenceBasedDSIServiceEntity(), $this->getEvidenceDSIAttributes()],
+            default => throw new \InvalidArgumentException("Unknown DSI service type: $type"),
+        };
         foreach ($attributes as $attr) {
             $service->setField($attr['option_id'], xl_list_label($attr['title']), $attr['source_value'] ?? '');
         }
@@ -176,7 +171,7 @@ class DecisionSupportInterventionService extends BaseService
             if (!$this->inNestedTransaction) {
                 QueryUtils::commitTransaction();
             }
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             if ($inTransaction && !$this->inNestedTransaction) {
                 QueryUtils::rollbackTransaction();
             }
@@ -230,12 +225,8 @@ class DecisionSupportInterventionService extends BaseService
     {
         $repository = $this->getClientRepository();
         $clientEntities = $repository->listClientEntities();
-        $clientEntities = array_filter($clientEntities, function ($clientEntity) {
-            return $clientEntity->hasPredictiveDSI() || $clientEntity->hasEvidenceDSI();
-        });
-        return array_map(function ($clientEntity) use ($isSummary) {
-            return $this->getServiceForClient($clientEntity, $isSummary);
-        }, $clientEntities);
+        $clientEntities = array_filter($clientEntities, fn($clientEntity): bool => $clientEntity->hasPredictiveDSI() || $clientEntity->hasEvidenceDSI());
+        return array_map(fn($clientEntity) => $this->getServiceForClient($clientEntity, $isSummary), $clientEntities);
     }
 
     public function getService($serviceId, bool $isSummary = false)

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Smarty plugin
  * @package Smarty
@@ -15,22 +16,22 @@
  * @author Monte Ohrt <monte at ohrt dot com>
  * @link http://smarty.php.net/manual/en/language.function.counter.php {counter}
  *       (Smarty online manual)
- * @param array parameters
- * @param Smarty
+ * @param array $params parameters
+ * @param mixed $smarty
  * @return string|null
  */
 function smarty_function_counter($params, &$smarty)
 {
-    static $counters = array();
+    static $counters = [];
 
-    $name = (isset($params['name'])) ? $params['name'] : 'default';
+    $name = $params['name'] ?? 'default';
     if (!isset($counters[$name])) {
-        $counters[$name] = array(
+        $counters[$name] = [
             'start'=>1,
             'skip'=>1,
             'direction'=>'up',
             'count'=>1
-            );
+            ];
     }
     $counter =& $counters[$name];
 
@@ -46,17 +47,9 @@ function smarty_function_counter($params, &$smarty)
         $smarty->assign($counter['assign'], $counter['count']);
     }
 
-    if (isset($params['print'])) {
-        $print = (bool)$params['print'];
-    } else {
-        $print = empty($counter['assign']);
-    }
+    $print = isset($params['print']) ? (bool)$params['print'] : empty($counter['assign']);
 
-    if ($print) {
-        $retval = $counter['count'];
-    } else {
-        $retval = null;
-    }
+    $retval = $print ? $counter['count'] : null;
 
     if (isset($params['skip'])) {
         $counter['skip'] = $params['skip'];

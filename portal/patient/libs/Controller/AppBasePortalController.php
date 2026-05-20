@@ -4,7 +4,7 @@
 
 /** import supporting libraries */
 require_once("verysimple/Phreeze/PortalController.php");
-require_once(dirname(__FILE__) . "/../../../lib/appsql.class.php");
+require_once(__DIR__ . "/../../../lib/appsql.class.php");
 /**
  * AppBaseController is a base class Controller class from which
  * the front controllers inherit.  it is not necessary to use this
@@ -24,7 +24,7 @@ class AppBasePortalController extends PortalController
 
     /**
      * Init is called by the base controller before the action method
-     * is called.  This provided an oportunity to hook into the system
+     * is called.  This provided an opportunity to hook into the system
      * for all application actions.  This is a good place for authentication
      * code.
      */
@@ -64,7 +64,7 @@ class AppBasePortalController extends PortalController
      */
     protected function SimpleObjectParams()
     {
-        return array('camelCase' => true);
+        return ['camelCase' => true];
     }
 
     /**
@@ -82,7 +82,7 @@ class AppBasePortalController extends PortalController
 
     /**
      * Helper utility that calls RenderErrorJSON
-     * @param Exception
+     * @param mixed $exception
      */
     protected function RenderExceptionJSON(Exception $exception)
     {
@@ -92,23 +92,23 @@ class AppBasePortalController extends PortalController
     /**
      * Output a Json error message to the browser
      * @param string $message
-     * @param array key/value pairs where the key is the fieldname and the value is the error
+     * @param array $errors key/value pairs where the key is the fieldname and the value is the error
      */
     protected function RenderErrorJSON($message, $errors = null, $exception = null)
     {
         $err = new stdClass();
         $err->success = false;
         $err->message = $message;
-        $err->errors = array();
+        $err->errors = [];
 
         if ($errors != null) {
             foreach ($errors as $key => $val) {
-                $err->errors[lcfirst($key)] = $val;
+                $err->errors[lcfirst((string) $key)] = $val;
             }
         }
 
         if ($exception) {
-            $err->stackTrace = explode("\n#", substr($exception->getTraceAsString(), 1));
+            $err->stackTrace = explode("\n#", substr((string) $exception->getTraceAsString(), 1));
         }
 
         @header('HTTP/1.1 401 Unauthorized');

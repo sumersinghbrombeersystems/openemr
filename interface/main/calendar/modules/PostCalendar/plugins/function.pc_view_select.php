@@ -25,25 +25,12 @@
  *  http://www.gnu.org/copyleft/gpl.html
  *
  */
-function smarty_function_pc_view_select($args)
+function smarty_function_pc_view_select($args): void
 {
     @define('_PC_FORM_TEMPLATE', true);
-    $Date = postcalendar_getDate();
-    if (!isset($y)) {
-        $y = substr($Date, 0, 4);
-    }
-
-    if (!isset($m)) {
-        $m = substr($Date, 4, 2);
-    }
-
-    if (!isset($d)) {
-        $d = substr($Date, 6, 2);
-    }
-
     $tplview = pnVarCleanFromInput('tplview');
     $viewtype = pnVarCleanFromInput('viewtype');
-    if (!isset($viewtype)) {
+    if ($viewtype === null || $viewtype === '') {
         $viewtype = _SETTING_DEFAULT_VIEW;
     }
 
@@ -55,10 +42,10 @@ function smarty_function_pc_view_select($args)
         $pcTemplate = 'default';
     }
 
-    $viewlist = array();
+    $viewlist = [];
     $handle = opendir("modules/$mdir/pntemplates/$pcTemplate/views/$viewtype");
 
-    $hide_list = array('.','..','CVS','index.html');
+    $hide_list = ['.','..','CVS','index.html'];
     while ($f = readdir($handle)) {
         if (!in_array($f, $hide_list)) {
             $viewlist[] = $f;
@@ -66,9 +53,9 @@ function smarty_function_pc_view_select($args)
     }
 
     closedir($handle);
-    unset($no_list);
     sort($viewlist);
     $tcount = count($viewlist);
+    $t = 0;
     //$options = "<select id=\"tplview\" name=\"tplview\" class=\"$args[class]\">"; - pennfirm
     $options = "<select id=\"tplview\" name=\"viewtype\" class=\"$args[class]\">";
     $selected = $tplview;

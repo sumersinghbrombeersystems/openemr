@@ -3,7 +3,7 @@
 /**
  * EncounterServiceTest.php
  * @package openemr
- * @link      http://www.open-emr.org
+ * @link      https://www.open-emr.org
  * @author    Stephen Nielson <stephen@nielson.org>
  * @copyright Copyright (c) 2021 Stephen Nielson <stephen@nielson.org>
  * @license   https://github.com/openemr/openemr/blob/master/LICENSE GNU General Public License 3
@@ -15,10 +15,9 @@ use OpenEMR\Common\Database\QueryUtils;
 use OpenEMR\Common\Uuid\UuidRegistry;
 use OpenEMR\Services\EncounterService;
 use OpenEMR\Tests\Fixtures\EncounterFixtureManager;
-use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
-#[CoversClass(EncounterService::class)]
 class EncounterServiceTest extends TestCase
 {
     /**
@@ -31,9 +30,7 @@ class EncounterServiceTest extends TestCase
      */
     private $fixtureManager;
 
-    /**
-     * @var EncounterFixture
-     */
+    /** @var array<string, mixed> */
     private $fixture;
 
     protected function setUp(): void
@@ -49,7 +46,7 @@ class EncounterServiceTest extends TestCase
     }
 
     #[Test]
-    public function testGetOne()
+    public function testGetOne(): void
     {
         $this->fixtureManager->installFixtures();
 
@@ -64,7 +61,7 @@ class EncounterServiceTest extends TestCase
     }
 
     #[Test]
-    public function testSearchWithBoundPatientUUID()
+    public function testSearchWithBoundPatientUUID(): void
     {
         $this->fixtureManager->installFixtures();
 

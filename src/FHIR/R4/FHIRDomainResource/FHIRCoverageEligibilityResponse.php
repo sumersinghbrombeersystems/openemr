@@ -580,7 +580,7 @@ class FHIRCoverageEligibilityResponse extends FHIRDomainResource implements \Jso
     /**
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         return $this->get_fhirElementName();
     }
@@ -656,7 +656,7 @@ class FHIRCoverageEligibilityResponse extends FHIRDomainResource implements \Jso
     }
 
     /**
-     * @param boolean $returnSXE
+     * @param bool $returnSXE
      * @param \SimpleXMLElement $sxe
      * @return string|\SimpleXMLElement
      */

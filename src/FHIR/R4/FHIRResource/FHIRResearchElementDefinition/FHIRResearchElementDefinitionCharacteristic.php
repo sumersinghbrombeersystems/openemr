@@ -676,7 +676,7 @@ class FHIRResearchElementDefinitionCharacteristic extends FHIRBackboneElement im
     /**
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         return $this->get_fhirElementName();
     }
@@ -757,7 +757,7 @@ class FHIRResearchElementDefinitionCharacteristic extends FHIRBackboneElement im
     }
 
     /**
-     * @param boolean $returnSXE
+     * @param bool $returnSXE
      * @param \SimpleXMLElement $sxe
      * @return string|\SimpleXMLElement
      */

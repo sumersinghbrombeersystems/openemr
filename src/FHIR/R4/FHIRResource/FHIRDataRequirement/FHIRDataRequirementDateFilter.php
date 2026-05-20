@@ -234,7 +234,7 @@ class FHIRDataRequirementDateFilter extends FHIRElement implements \JsonSerializ
     /**
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         return $this->get_fhirElementName();
     }
@@ -264,7 +264,7 @@ class FHIRDataRequirementDateFilter extends FHIRElement implements \JsonSerializ
     }
 
     /**
-     * @param boolean $returnSXE
+     * @param bool $returnSXE
      * @param \SimpleXMLElement $sxe
      * @return string|\SimpleXMLElement
      */

@@ -312,7 +312,7 @@ class FHIRMedicinalProductIngredientStrength extends FHIRBackboneElement impleme
     /**
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         return $this->get_fhirElementName();
     }
@@ -354,7 +354,7 @@ class FHIRMedicinalProductIngredientStrength extends FHIRBackboneElement impleme
     }
 
     /**
-     * @param boolean $returnSXE
+     * @param bool $returnSXE
      * @param \SimpleXMLElement $sxe
      * @return string|\SimpleXMLElement
      */

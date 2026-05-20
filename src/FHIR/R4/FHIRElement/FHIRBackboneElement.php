@@ -139,7 +139,7 @@ Modifier extensions SHALL NOT change the meaning of any elements on Resource or 
     /**
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         return $this->get_fhirElementName();
     }
@@ -160,7 +160,7 @@ Modifier extensions SHALL NOT change the meaning of any elements on Resource or 
     }
 
     /**
-     * @param boolean $returnSXE
+     * @param bool $returnSXE
      * @param \SimpleXMLElement $sxe
      * @return string|\SimpleXMLElement
      */

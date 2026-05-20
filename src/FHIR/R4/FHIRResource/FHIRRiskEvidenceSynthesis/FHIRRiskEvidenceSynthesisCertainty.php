@@ -202,7 +202,7 @@ class FHIRRiskEvidenceSynthesisCertainty extends FHIRBackboneElement implements 
     /**
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         return $this->get_fhirElementName();
     }
@@ -235,7 +235,7 @@ class FHIRRiskEvidenceSynthesisCertainty extends FHIRBackboneElement implements 
     }
 
     /**
-     * @param boolean $returnSXE
+     * @param bool $returnSXE
      * @param \SimpleXMLElement $sxe
      * @return string|\SimpleXMLElement
      */

@@ -184,7 +184,7 @@ class FHIRCodeSystemDesignation extends FHIRBackboneElement implements \JsonSeri
     /**
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         return (string)$this->getValue();
     }
@@ -208,7 +208,7 @@ class FHIRCodeSystemDesignation extends FHIRBackboneElement implements \JsonSeri
     }
 
     /**
-     * @param boolean $returnSXE
+     * @param bool $returnSXE
      * @param \SimpleXMLElement $sxe
      * @return string|\SimpleXMLElement
      */

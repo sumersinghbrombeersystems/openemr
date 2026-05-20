@@ -825,7 +825,7 @@ class FHIRCommunicationRequest extends FHIRDomainResource implements \JsonSerial
     /**
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         return $this->get_fhirElementName();
     }
@@ -943,7 +943,7 @@ class FHIRCommunicationRequest extends FHIRDomainResource implements \JsonSerial
     }
 
     /**
-     * @param boolean $returnSXE
+     * @param bool $returnSXE
      * @param \SimpleXMLElement $sxe
      * @return string|\SimpleXMLElement
      */

@@ -3,7 +3,7 @@
 /**
  * CarePlanServiceTest.php
  * @package openemr
- * @link      http://www.open-emr.org
+ * @link      https://www.open-emr.org
  * @author    Stephen Nielson <stephen@nielson.org>
  * @copyright Copyright (c) 2021 Stephen Nielson <stephen@nielson.org>
  * @license   https://github.com/openemr/openemr/blob/master/LICENSE GNU General Public License 3
@@ -13,20 +13,19 @@ namespace OpenEMR\Tests\Services;
 
 use OpenEMR\Services\CarePlanService;
 use OpenEMR\Tests\Fixtures\CarePlanFixtureManager;
-use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
 /**
  * CarePlan Service Tests
  *
  * @package   OpenEMR
- * @link      http://www.open-emr.org
+ * @link      https://www.open-emr.org
  * @author    Yash Bothra <yashrajbothra786gmail.com>
  * @copyright Copyright (c) 2020 Yash Bothra <yashrajbothra786gmail.com>
  * @license   https://github.com/openemr/openemr/blob/master/LICENSE GNU General Public License 3
  */
 
-#[CoversClass(CarePlanService::class)]
 class CarePlanServiceTest extends TestCase
 {
     /**
@@ -34,9 +33,7 @@ class CarePlanServiceTest extends TestCase
      */
     private $service;
 
-    /**
-     * @var CarePlanFixture
-     */
+    /** @var array<string, mixed> */
     private $fixture;
 
     /**
@@ -57,13 +54,13 @@ class CarePlanServiceTest extends TestCase
     }
 
     #[Test]
-    public function testGetOne()
+    public function testGetOne(): void
     {
         $this->markTestIncomplete("This test is not implemented");
     }
 
     #[Test]
-    public function testGetSurrogateKeyForRecord()
+    public function testGetSurrogateKeyForRecord(): void
     {
         // we are going to use the old care plan
         $expectedResult = sqlQuery("SELECT `fcp`.`id` AS `form_id`,`fe`.`uuid` AS `euuid`, `fcp`.`encounter` FROM `form_care_plan` fcp "

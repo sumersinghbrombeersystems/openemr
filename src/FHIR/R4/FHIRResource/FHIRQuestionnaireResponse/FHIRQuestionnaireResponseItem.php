@@ -254,7 +254,7 @@ class FHIRQuestionnaireResponseItem extends FHIRBackboneElement implements \Json
     /**
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         return $this->get_fhirElementName();
     }
@@ -290,7 +290,7 @@ class FHIRQuestionnaireResponseItem extends FHIRBackboneElement implements \Json
     }
 
     /**
-     * @param boolean $returnSXE
+     * @param bool $returnSXE
      * @param \SimpleXMLElement $sxe
      * @return string|\SimpleXMLElement
      */

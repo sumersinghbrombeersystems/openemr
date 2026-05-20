@@ -306,7 +306,7 @@ class FHIRRiskEvidenceSynthesisRiskEstimate extends FHIRBackboneElement implemen
     /**
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         return (string)$this->getValue();
     }
@@ -345,7 +345,7 @@ class FHIRRiskEvidenceSynthesisRiskEstimate extends FHIRBackboneElement implemen
     }
 
     /**
-     * @param boolean $returnSXE
+     * @param bool $returnSXE
      * @param \SimpleXMLElement $sxe
      * @return string|\SimpleXMLElement
      */

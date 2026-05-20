@@ -331,7 +331,7 @@ class FHIRMedicinalProductContraindication extends FHIRDomainResource implements
     /**
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         return $this->get_fhirElementName();
     }
@@ -383,7 +383,7 @@ class FHIRMedicinalProductContraindication extends FHIRDomainResource implements
     }
 
     /**
-     * @param boolean $returnSXE
+     * @param bool $returnSXE
      * @param \SimpleXMLElement $sxe
      * @return string|\SimpleXMLElement
      */

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Smarty plugin
  * @package Smarty
@@ -15,18 +16,18 @@
  * @link http://smarty.php.net/manual/en/language.modifier.debug.print.var.php
  *          debug_print_var (Smarty online manual)
  * @author   Monte Ohrt <monte at ohrt dot com>
- * @param array|object
- * @param integer
- * @param integer
+ * @param array|object $var
+ * @param int $depth
+ * @param int $length
  * @return string
  */
 function smarty_modifier_debug_print_var($var, $depth = 0, $length = 40)
 {
-    $_replace = array(
+    $_replace = [
         "\n" => '<i>\n</i>',
         "\r" => '<i>\r</i>',
         "\t" => '<i>\t</i>'
-    );
+    ];
 
     switch (gettype($var)) {
         case 'array' :
@@ -40,7 +41,7 @@ function smarty_modifier_debug_print_var($var, $depth = 0, $length = 40)
             break;
         case 'object' :
             $object_vars = get_object_vars($var);
-            $results = '<b>' . get_class($var) . ' Object (' . count($object_vars) . ')</b>';
+            $results = '<b>' . $var::class . ' Object (' . count($object_vars) . ')</b>';
             foreach ($object_vars as $curr_key => $curr_val) {
                 $results .= '<br>' . str_repeat('&nbsp;', $depth * 2)
                     . '<b> -&gt;' . strtr($curr_key, $_replace) . '</b> = '

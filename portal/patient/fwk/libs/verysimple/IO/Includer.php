@@ -24,8 +24,7 @@ class Includer
      * If PHP is unable to include the file,
      * an IncludeException is thrown instead of a PHP warning
      *
-     * @param
-     *          string path to file passed to the include_once statement
+     * @param string $path path to file passed to the include_once statement
      */
     public static function IncludeFile($path)
     {
@@ -33,10 +32,10 @@ class Includer
         // use include instead of require so we can catch runtime exceptions
         // reset error handling back to whatever it was
         // *
-        set_error_handler(array (
+        set_error_handler([
                 "Includer",
                 "IncludeException"
-        ), E_WARNING);
+        ], E_WARNING);
         include_once($path);
         restore_error_handler();
         // */
@@ -52,10 +51,8 @@ class Includer
      * will be thrown. The path that will be used for include_once is
      * $classpath . "/" . $classname . ".php"
      *
-     * @param
-     *          string name of class (ex Phreeze)
-     * @param
-     *          string or array [optional] the relative path(s) where the file would be found
+     * @param string $classname name of class (ex Phreeze)
+     * @param string $classpath or array [optional] the relative path(s) where the file would be found
      */
     public static function RequireClass($classname, $classpath = "")
     {
@@ -64,9 +61,9 @@ class Includer
         }
 
             // normalize this as an array
-        $classpaths = is_array($classpath) ? $classpath : array (
+        $classpaths = is_array($classpath) ? $classpath :  [
                 $classpath
-        );
+        ];
         $attempts = "";
 
         foreach ($classpaths as $path) {
@@ -75,8 +72,8 @@ class Includer
             }
 
             try {
-                // append a directory separater if necessary
-                if ($path && substr($path, - 1) != "/") {
+                // append a directory separator if necessary
+                if ($path && !str_ends_with((string) $path, "/")) {
                     $path .= "/";
                 }
 
@@ -102,9 +99,9 @@ class Includer
             return;
         }
 
-        $tmp1 = explode(")", $string);
+        $tmp1 = explode(")", (string) $string);
         $tmp2 = explode("(", $tmp1 [0]);
-        $mfile = isset($tmp2 [1]) ? $tmp2 [1] : "";
+        $mfile = $tmp2 [1] ?? "";
 
         $msg = "Error $code: " . ($mfile ? "Unable to include file: '" . $mfile . "'" : $string);
 

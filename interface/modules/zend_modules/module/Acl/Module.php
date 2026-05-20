@@ -21,26 +21,22 @@ class Module
     public function getAutoloaderConfig()
     {
         // TODO: verify that we need this namespace autoloader... it should be on by default...
-        return array(
-            'Laminas\Loader\StandardAutoloader' => array(
-                'namespaces' => array(
+        return [
+            \Laminas\Loader\StandardAutoloader::class => [
+                'namespaces' => [
                     __NAMESPACE__ => __DIR__ . '/src/' . __NAMESPACE__,
-                ),
-            ),
-        );
+                ],
+            ],
+        ];
     }
 
     public function getServiceConfig()
     {
-        return array(
-            'factories' => array(
-                'Acl\Model\AclTable' =>  function ($sm) {
-                    $dbAdapter = $sm->get('Laminas\Db\Adapter\Adapter');
-                    $table = new AclTable($dbAdapter);
-                    return $table;
-                },
-            ),
-        );
+        return [
+            'factories' => [
+                AclTable::class => fn($sm) => new AclTable(),
+            ],
+        ];
     }
 
     public function getConfig()
@@ -55,10 +51,10 @@ class Module
             $controller = $e->getTarget();
             $controller->layout('acl/layout/layout');
             $route = $controller->getEvent()->getRouteMatch();
-            $controller->getEvent()->getViewModel()->setVariables(array(
+            $controller->getEvent()->getViewModel()->setVariables([
                 'current_controller' => $route->getParam('controller'),
                 'current_action' => $route->getParam('action'),
-            ));
+            ]);
         }, 100);
     }
 }

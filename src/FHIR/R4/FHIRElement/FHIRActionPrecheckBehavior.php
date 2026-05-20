@@ -124,7 +124,7 @@ class FHIRActionPrecheckBehavior extends FHIRElement implements \JsonSerializabl
     /**
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         return (string)$this->getValue();
     }
@@ -138,7 +138,7 @@ class FHIRActionPrecheckBehavior extends FHIRElement implements \JsonSerializabl
     }
 
     /**
-     * @param boolean $returnSXE
+     * @param bool $returnSXE
      * @param \SimpleXMLElement $sxe
      * @return string|\SimpleXMLElement
      */
